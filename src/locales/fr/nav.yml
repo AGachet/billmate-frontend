@@ -1,0 +1,18 @@
+main-navigation:
+  tk_dashboard_: 'Tableau de bord'
+  tk_sales-management_: 'Gestion des ventes'
+  tk_customer-management_: 'Gestion des clients'
+  tk_cost-management_: 'Gestion des dépenses'
+
+  tk_summary_: 'Résumé'
+  tk_products_: 'Produits'
+  tk_services_: 'Services'
+  tk_quotes_: 'Devis'
+  tk_invoices_: 'Factures'
+  tk_credit-notes_: 'Avoirs'
+  tk_customers_: 'Clients'
+  tk_leads_: 'Prospects'
+  tk_providers_: 'Fournisseurs'
+  tk_product-costs_: 'Coûts des produits'
+  tk_service-costs_: 'Coûts des services'
+  tk_travel-costs_: 'Frais de déplacement'

@@ -1,0 +1,18 @@
+main-navigation:
+  tk_dashboard_: 'Dashboard'
+  tk_sales-management_: 'Sales management'
+  tk_customer-management_: 'Customer management'
+  tk_cost-management_: 'Cost management'
+
+  tk_summary_: 'Summary'
+  tk_products_: 'Products'
+  tk_services_: 'Services'
+  tk_quotes_: 'Quotes'
+  tk_invoices_: 'Invoices'
+  tk_credit-notes_: 'Credit notes'
+  tk_customers_: 'Customers'
+  tk_leads_: 'Leads'
+  tk_providers_: 'Vendors'
+  tk_product-costs_: 'Product costs'
+  tk_service-costs_: 'Service costs'
+  tk_travel-costs_: 'Travel costs'
