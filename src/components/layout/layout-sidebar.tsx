@@ -216,7 +216,9 @@ const data: SideBarConfig = {
 export const LayoutSidebar = ({ ...props }: React.ComponentProps<typeof Sidebar>) => {
   const { state } = useSidebar()
   const { t } = useTranslation('nav')
-  const isColapsed = state === 'collapsed'
+  const isCollapsed = state === 'collapsed'
+
+  const buttonClassName = cn('mt-6', isCollapsed ? 'mx-2 overflow-hidden px-2 text-xs' : 'mx-6 text-base')
 
   return (
     <Sidebar collapsible="icon" {...props}>
@@ -224,12 +226,12 @@ export const LayoutSidebar = ({ ...props }: React.ComponentProps<typeof Sidebar>
         <TeamSwitcher teams={data.teams} />
       </SidebarHeader>
       <SidebarContent>
-        <Button className={cn('mt-6', isColapsed ? 'mx-2 overflow-hidden px-2 text-xs' : 'mx-6 text-base')}>
+        <Button className={buttonClassName}>
           <ChartNoAxesCombined className="cursor-pointer" />
-          {!isColapsed && t('main-navigation.tk_dashboard_')}
+          {!isCollapsed && t('main-navigation.tk_dashboard_')}
         </Button>
         {data.navigation.map((section, index) => (
-          <NavSection key={index} section={section} />
+          <NavSection key={`nav-section-${index}`} section={section} />
         ))}
       </SidebarContent>
       <SidebarFooter>

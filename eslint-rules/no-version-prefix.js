@@ -12,18 +12,21 @@ export default {
         schema: []
       },
       create(context) {
+        const DEPENDENCY_TYPES = ['dependencies', 'devDependencies']
+        const VERSION_PREFIXES = ['^', '~']
+
         return {
           Property(node) {
-            if (node.key.value === 'dependencies' || node.key.value === 'devDependencies') {
-              for (const dep of node.value.properties) {
+            if (DEPENDENCY_TYPES.includes(node.key.value)) {
+              node.value.properties.forEach((dep) => {
                 const version = dep.value.value
-                if (version && (version.startsWith('^') || version.startsWith('~'))) {
+                if (version && VERSION_PREFIXES.some((prefix) => version.startsWith(prefix))) {
                   context.report({
                     node: dep.value,
                     message: `Version for "${dep.key.value}" should be fixed (no "^" or "~").`
                   })
                 }
-              }
+              })
             }
           }
         }
