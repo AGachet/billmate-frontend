@@ -4,7 +4,7 @@ import reactRefresh from 'eslint-plugin-react-refresh'
 import prettier from 'eslint-plugin-prettier'
 import jsoncPlugin from 'eslint-plugin-jsonc'
 import tseslint from 'typescript-eslint'
-import noVersionPrefixPlugin from './eslint-rules/no-version-prefix.js' // ✅ Import du plugin
+import noVersionPrefixPlugin from './eslint-rules/no-version-prefix.js'
 
 export default [
   {

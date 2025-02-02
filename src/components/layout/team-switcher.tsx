@@ -1,4 +1,4 @@
-import * as React from 'react'
+import { useState } from 'react'
 import { ChevronsUpDown, Plus } from 'lucide-react'
 import { useTranslation } from 'react-i18next'
 
@@ -15,7 +15,7 @@ export function TeamSwitcher({
   }[]
 }) {
   const { isMobile } = useSidebar()
-  const [activeTeam, setActiveTeam] = React.useState(teams[0])
+  const [activeTeam, setActiveTeam] = useState(teams[0])
   const { t } = useTranslation()
 
   return (

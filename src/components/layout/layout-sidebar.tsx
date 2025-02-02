@@ -1,7 +1,6 @@
 /**
  * Resources & configs
  */
-import * as React from 'react'
 import { cn } from '@/lib/utils'
 import { useTranslation } from 'react-i18next'
 
@@ -40,6 +39,7 @@ import { NavUser } from '@/components/nav/nav-user'
 /**
  * TS Types
  */
+import type { ComponentProps } from 'react'
 import type { NavSectionItem } from '@/components/nav/nav-section'
 
 type User = {
@@ -213,7 +213,7 @@ const data: SideBarConfig = {
 /**
  * React declaration
  */
-export const LayoutSidebar = ({ ...props }: React.ComponentProps<typeof Sidebar>) => {
+export const LayoutSidebar = ({ ...props }: ComponentProps<typeof Sidebar>) => {
   const { state } = useSidebar()
   const { t } = useTranslation('nav')
   const isCollapsed = state === 'collapsed'

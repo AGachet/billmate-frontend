@@ -1,13 +1,16 @@
-import { LayoutLogged } from '@/components/layout/layout-logged'
+import { RouterProvider } from 'react-router-dom'
+import { router } from '@/router/routes'
+import { Suspense } from 'react'
 
 function App() {
+  if (!router) {
+    return <div>Loading...</div>
+  }
+
   return (
-    <LayoutLogged>
-      <div className="container mx-auto">
-        <h2 className="mb-4 text-2xl font-bold">Welcome to FreelancerHub!</h2>
-        <p>Here you can manage your clients, projects, and finances effectively.</p>
-      </div>
-    </LayoutLogged>
+    <Suspense fallback={<div>Loading...</div>}>
+      <RouterProvider router={router} />
+    </Suspense>
   )
 }
 
