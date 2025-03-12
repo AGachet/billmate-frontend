@@ -1,0 +1,33 @@
+signup:
+  # -- Information
+  tk_title_: Création de compte
+  tk_description_: Rejoignez-nous
+  tk_alreadyAccount_: Vous avez déjà un compte ?
+  tk_verifyEmailDescription_:
+    Nous avons envoyé un email contenant un lien de confirmation à {{ userEmail }}. Veuillez cliquer sur celui-ci pour activer votre compte. Ne perdez pas de temps, le lien n'est valide que pour 24
+    heures.
+  tk_checkSpam_: Si vous ne voyez pas l'email, veuillez vérifier votre dossier spam.
+  tk_successTitle_: Compte créé avec succès
+  tk_successDescription_: Vérifiez votre email pour les instructions de vérification.
+  # tk_or_: (common.yml)
+
+  # -- fields
+  tk_email_: Email
+  tk_password_: Mot de passe
+  tk_passwordDescription_: Le mot de passe doit contenir au moins 6 caractères
+  # tk_emailPlaceholder_: (common.yml)
+  # tk_firstName_: (common.yml)
+  # tk_firstNamePlaceholder_: (common.yml)
+  # tk_lastName_: (common.yml)
+  # tk_lastNamePlaceholder_: (common.yml)
+
+  # -- errors
+  tk_firstNameError_: Prénom est requis
+  tk_lastNameError_: Nom est requis
+  tk_emailError_: Email est invalide
+  tk_passwordError_: Mot de passe est requis
+  tk_passwordDescriptionError_: Mot de passe doit contenir au moins 6 caractères
+
+  # -- CTA
+  tk_signup_: Créer un compte
+  tk_signinLink_: Se connecter

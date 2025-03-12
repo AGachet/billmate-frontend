@@ -1,3 +1,17 @@
 version:
-  free: 'Version gratuite'
-  premium: 'Version premium'
+  tk_free_: 'Version gratuite'
+  tk_premium_: 'Version premium'
+
+user:
+  tk_firstName_: Prénom
+  tk_firstNamePlaceholder_: Bruce
+  tk_lastName_: Nom
+  tk_lastNamePlaceholder_: Wayne
+  tk_email_: Email
+  tk_emailPlaceholder_: bruce.wayne@wayne-enterprises.com
+
+loading:
+  tk_loadingCreate_: 'Création en cours...'
+
+other:
+  tk_or_: 'ou'

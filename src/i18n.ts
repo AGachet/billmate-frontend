@@ -31,7 +31,7 @@ i18n
     fallbackLng: 'en',
     debug: false,
     interpolation: { escapeValue: false },
-    ns: ['common', 'nav'],
+    ns: ['common', 'nav', 'auth'],
     defaultNS: 'common'
   })
 
