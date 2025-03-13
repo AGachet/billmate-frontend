@@ -11,7 +11,9 @@ user:
   tk_emailPlaceholder_: bruce.wayne@wayne-enterprises.com
 
 loading:
+  tk_loadingSignin_: 'Connexion en cours...'
   tk_loadingCreate_: 'Création en cours...'
+  tk_loadingSend_: 'Envoi en cours...'
 
 other:
   tk_or_: 'ou'

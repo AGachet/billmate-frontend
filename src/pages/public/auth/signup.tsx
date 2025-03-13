@@ -2,33 +2,32 @@
  * Resources & configs
  */
 import { zodResolver } from '@hookform/resolvers/zod'
-import { Link } from 'react-router-dom'
-import { useForm } from 'react-hook-form'
 import { useState } from 'react'
-import { z } from 'zod'
-
+import { useForm } from 'react-hook-form'
 import { useTranslation } from 'react-i18next'
+import { z } from 'zod'
 
 /**
  * Components
  */
-import { Input } from '@/components/ui/input'
+import { Alert, AlertDescription } from '@/components/ui/alert'
 import { Button } from '@/components/ui/button'
-import { Separator } from '@/components/ui/separator'
-import { Form, FormControl, FormDescription, FormField, FormItem, FormLabel, FormMessage } from '@/components/ui/form'
 import { Card, CardContent, CardDescription, CardFooter, CardHeader, CardTitle } from '@/components/ui/card'
+import { Form, FormControl, FormDescription, FormField, FormItem, FormLabel, FormMessage } from '@/components/ui/form'
+import { Input } from '@/components/ui/input'
+import { Separator } from '@/components/ui/separator'
 import { CheckCircle } from 'lucide-react'
-import { Alert, AlertDescription, AlertTitle } from '@/components/ui/alert'
+import { Link } from 'react-router-dom'
 
 /**
  * Form schema definition
  */
 const createFormSchema = (tAuth: (key: string) => string) =>
   z.object({
-    firstName: z.string().min(1, { message: tAuth('signup.tk_firstNameError_') }),
-    lastName: z.string().min(1, { message: tAuth('signup.tk_lastNameError_') }),
-    email: z.string().email({ message: tAuth('signup.tk_emailError_') }),
-    password: z.string().min(8, { message: tAuth('signup.tk_passwordError_') })
+    firstName: z.string().min(1, { message: tAuth('fields.tk_firstNameError_') }),
+    lastName: z.string().min(1, { message: tAuth('fields.tk_lastNameError_') }),
+    email: z.string().email({ message: tAuth('fields.tk_emailError_') }),
+    password: z.string().min(8, { message: tAuth('fields.tk_passwordError_') })
   })
 
 type FormSchemaType = z.infer<ReturnType<typeof createFormSchema>>
@@ -65,8 +64,22 @@ export function SignUp() {
     }, 1000)
   }
 
-  // Reusable form field component
-  const renderFormField = (name: keyof FormSchemaType, label: string, placeholder?: string, type?: string, autoComplete?: string, description?: string) => (
+  // Reusable form field
+  const renderFormField = ({
+    name,
+    label,
+    placeholder = '',
+    type = 'text',
+    autoComplete = '',
+    description = ''
+  }: {
+    name: keyof FormSchemaType
+    label: string
+    placeholder?: string
+    type?: string
+    autoComplete?: string
+    description?: string
+  }) => (
     <FormField
       control={form.control}
       name={name}
@@ -92,8 +105,8 @@ export function SignUp() {
             <div className="mb-4 flex justify-center">
               <CheckCircle className="h-16 w-16 text-green-500" />
             </div>
-            <CardTitle className="text-center text-2xl">{tAuth('signup.tk_successTitle_') || 'Inscription réussie !'}</CardTitle>
-            <CardDescription className="text-center">{tAuth('signup.tk_successDescription_') || 'Votre compte a été créé avec succès.'}</CardDescription>
+            <CardTitle className="text-center text-2xl">{tAuth('signup.tk_successTitle_')}</CardTitle>
+            <CardDescription className="text-center">{tAuth('signup.tk_successDescription_')}</CardDescription>
           </CardHeader>
           <CardContent className="space-y-4">
             <Alert className="bg-blue-50 text-blue-800">
@@ -103,7 +116,7 @@ export function SignUp() {
           </CardContent>
           <CardFooter className="flex justify-center">
             <Link to="/signin" className="font-medium text-blue-600 hover:text-blue-500">
-              {tAuth('signin.tk_signin_')}
+              {tAuth('callToAction.tk_signin_')}
             </Link>
           </CardFooter>
         </Card>
@@ -122,15 +135,36 @@ export function SignUp() {
         <Form {...form}>
           <form onSubmit={form.handleSubmit(onSubmit)} className="mt-8 space-y-6">
             <div className="grid grid-cols-2 gap-4">
-              {renderFormField('firstName', tCommon('user.tk_firstName_'), tCommon('user.tk_firstNamePlaceholder_'))}
-              {renderFormField('lastName', tCommon('user.tk_lastName_'), tCommon('user.tk_lastNamePlaceholder_'))}
+              {renderFormField({
+                name: 'firstName',
+                placeholder: tCommon('user.tk_firstNamePlaceholder_'),
+                label: tCommon('user.tk_firstName_')
+              })}
+              {renderFormField({
+                name: 'lastName',
+                placeholder: tCommon('user.tk_lastNamePlaceholder_'),
+                label: tCommon('user.tk_lastName_')
+              })}
             </div>
 
-            {renderFormField('email', tCommon('user.tk_email_'), tCommon('user.tk_emailPlaceholder_'), 'email', 'email')}
-            {renderFormField('password', tAuth('signup.tk_password_'), undefined, 'password', 'new-password', tAuth('signup.tk_passwordDescription_'))}
+            {renderFormField({
+              name: 'email',
+              label: tCommon('user.tk_email_'),
+              placeholder: tCommon('user.tk_emailPlaceholder_'),
+              type: 'email',
+              autoComplete: 'email'
+            })}
+
+            {renderFormField({
+              name: 'password',
+              label: tAuth('fields.tk_password_'),
+              type: 'password',
+              autoComplete: 'new-password',
+              description: tAuth('fields.tk_passwordDescription_')
+            })}
 
             <Button type="submit" className="w-full" disabled={isLoading}>
-              {isLoading ? tCommon('loading.tk_loadingCreate_') : tAuth('signup.tk_signup_')}
+              {isLoading ? tCommon('loading.tk_loadingCreate_') : tAuth('callToAction.tk_signup_')}
             </Button>
 
             <div className="flex items-center justify-center">
@@ -143,7 +177,7 @@ export function SignUp() {
               <p className="text-sm text-gray-600">
                 {tAuth('signup.tk_alreadyAccount_')}{' '}
                 <Link to="/signin" className="font-medium text-blue-600 hover:text-blue-500">
-                  {tAuth('signin.tk_signin_')}
+                  {tAuth('callToAction.tk_signin_')}
                 </Link>
               </p>
             </div>

@@ -10,7 +10,7 @@ import { auth } from '@/lib/auth'
  * Pages
  */
 import { NotFound } from '@/pages/public/not-found'
-import { SignUp } from '@/pages/public/auth'
+import { SignIn, SignUp, ResetPasswordRequest, ResetPassword } from '@/pages/public/auth'
 
 /**
  * Routes
@@ -22,12 +22,12 @@ export const publicRoutes: RouteObject[] = [
     children: [
       {
         path: '/',
-        element: <Navigate to="/signup" replace />
+        element: <Navigate to="/signin" replace />
       },
-      // {
-      //   path: 'signin',
-      //   element: auth.isAuthenticated() ? <Navigate to="/dashboard" replace /> : <SignIn />
-      // },
+      {
+        path: 'signin',
+        element: auth.isAuthenticated() ? <Navigate to="/dashboard" replace /> : <SignIn />
+      },
       {
         path: 'signup',
         element: auth.isAuthenticated() ? <Navigate to="/dashboard" replace /> : <SignUp />

@@ -4,14 +4,16 @@ version:
 
 user:
   tk_firstName_: First name
-  tk_firstNamePlaceholder_: Bruce
+  tk_firstNamePlaceholder_: Bill
   tk_lastName_: Last name
-  tk_lastNamePlaceholder_: Wayne
+  tk_lastNamePlaceholder_: Matt
   tk_email_: Email
-  tk_emailPlaceholder_: bruce.wayne@wayne-enterprises.com
+  tk_emailPlaceholder_: bill.matt@billmate.com
 
 loading:
   tk_loadingCreate_: 'Creating...'
+  tk_loadingSignin_: 'Signing in...'
+  tk_loadingSend_: 'Sending...'
 
 other:
   tk_or_: 'or'

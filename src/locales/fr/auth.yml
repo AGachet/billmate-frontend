@@ -1,5 +1,4 @@
 signup:
-  # -- Information
   tk_title_: Création de compte
   tk_description_: Rejoignez-nous
   tk_alreadyAccount_: Vous avez déjà un compte ?
@@ -9,25 +8,28 @@ signup:
   tk_checkSpam_: Si vous ne voyez pas l'email, veuillez vérifier votre dossier spam.
   tk_successTitle_: Compte créé avec succès
   tk_successDescription_: Vérifiez votre email pour les instructions de vérification.
-  # tk_or_: (common.yml)
 
-  # -- fields
-  tk_email_: Email
+signin:
+  tk_title_: Connexion
+  tk_description_: Accédez à votre compte
+  tk_noAccount_: Vous n'avez pas de compte ?
+  tk_authError_: Les informations fournies ne permettent pas de retrouver votre compte.
+
+fields:
+  # tk_firstName_: (common.yml > user)
+  tk_firstNameError_: Le prénom est requis
+  # tk_firstNamePlaceholder_: (common.yml > user)
+  # tk_lastName_: (common.yml > user)
+  tk_lastNameError_: Le nom est requis
+  # tk_lastNamePlaceholder_: (common.yml > user)
+  # tk_email_: (common.yml > user)
+  tk_emailError_: L'email est invalide
+  # tk_emailPlaceholder_: (common.yml > user)
   tk_password_: Mot de passe
+  tk_passwordError_: Le mot de passe est requis
   tk_passwordDescription_: Le mot de passe doit contenir au moins 6 caractères
-  # tk_emailPlaceholder_: (common.yml)
-  # tk_firstName_: (common.yml)
-  # tk_firstNamePlaceholder_: (common.yml)
-  # tk_lastName_: (common.yml)
-  # tk_lastNamePlaceholder_: (common.yml)
 
-  # -- errors
-  tk_firstNameError_: Prénom est requis
-  tk_lastNameError_: Nom est requis
-  tk_emailError_: Email est invalide
-  tk_passwordError_: Mot de passe est requis
-  tk_passwordDescriptionError_: Mot de passe doit contenir au moins 6 caractères
-
-  # -- CTA
+callToAction:
+  tk_signin_: Connexion
+  tk_forgotPassword_: Mot de passe oublié ?
   tk_signup_: Créer un compte
-  tk_signinLink_: Se connecter

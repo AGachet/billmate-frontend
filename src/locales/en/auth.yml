@@ -1,32 +1,34 @@
 signup:
-  # -- Information
-  tk_title_: Create an account
-  tk_description_: Join us today
+  tk_title_: Sign up
+  tk_description_: Create an account
   tk_alreadyAccount_: Already have an account?
   tk_verifyEmailDescription_:
     We have sent an email containing a confirmation link to {{ userEmail }}. Please click on it to activate your account. Don't waste time, the link is only valid for 24 hours.
   tk_checkSpam_: If you don't see the email, please check your spam folder.
   tk_successTitle_: Account created successfully
   tk_successDescription_: Check your email for verification instructions.
-  # tk_or_: (common.yml)
 
-  # -- fields
-  tk_email_: Email
-  tk_password_: Password
-  tk_passwordDescription_: The password must contain at least 6 characters
-  # tk_emailPlaceholder_: (common.yml)
-  # tk_firstName_: (common.yml)
-  # tk_firstNamePlaceholder_: (common.yml)
-  # tk_lastName_: (common.yml)
-  # tk_lastNamePlaceholder_: (common.yml)
+signin:
+  tk_title_: Sign in
+  tk_description_: Access your account
+  tk_noAccount_: Don't have an account?
+  tk_authError_: The provided credentials do not match any account.
 
-  # -- errors
+fields:
+  # tk_firstName_: (common.yml > user)
   tk_firstNameError_: First name is required
+  # tk_firstNamePlaceholder_: (common.yml > user)
+  # tk_lastName_: (common.yml > user)
   tk_lastNameError_: Last name is required
+  # tk_lastNamePlaceholder_: (common.yml > user)
+  # tk_email_: (common.yml > user)
   tk_emailError_: Email is invalid
+  # tk_emailPlaceholder_: (common.yml > user)
+  tk_password_: Password
   tk_passwordError_: Password is required
-  tk_passwordDescriptionError_: Password must contain at least 6 characters
+  tk_passwordDescription_: The password must contain at least 6 characters
 
-  # -- CTA
-  tk_signup_: Create an account
-  tk_signinLink_: Sign in
+callToAction:
+  tk_signin_: Sign in
+  tk_forgotPassword_: Forgot your password?
+  tk_signup_: Sign up
