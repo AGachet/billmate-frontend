@@ -8,7 +8,7 @@ import { auth } from '@/lib/auth'
 /**
  * Pages
  */
-import { ResetPasswordRequest, SignIn, SignUp } from '@/pages/public/auth'
+import { ResetPassword, ResetPasswordRequest, SignIn, SignUp } from '@/pages/public/auth'
 import { NotFound } from '@/pages/public/not-found'
 
 /**
@@ -34,11 +34,11 @@ export const publicRoutes: RouteObject[] = [
       {
         path: 'reset-password-request',
         element: auth.isAuthenticated() ? <Navigate to="/dashboard" replace /> : <ResetPasswordRequest />
+      },
+      {
+        path: 'reset-password',
+        element: auth.isAuthenticated() ? <Navigate to="/dashboard" replace /> : <ResetPassword />
       }
-      // {
-      //   path: 'reset-password',
-      //   element: auth.isAuthenticated() ? <Navigate to="/dashboard" replace /> : <ResetPassword />
-      // }
       // Add other public routes here
     ]
   }

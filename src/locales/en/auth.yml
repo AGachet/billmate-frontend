@@ -22,6 +22,15 @@ resetPasswordRequest:
   tk_successTitle_: Reset link sent
   tk_successDescription_: Check your email!
 
+resetPassword:
+  tk_title_: New password
+  tk_description_: Update your password
+  tk_missingTokenError_: A token password token is required to reset your password.
+  tk_invalidTokenError_: The token appears to be invalid.
+  tk_successTitle_: Password updated successfully
+  tk_successDescription_: Ready to sign in?
+  tk_verifyPasswordUpdatedDescription_: You can now sign in with your new password.
+
 fields:
   # tk_firstName_: (common.yml > user)
   tk_firstNameError_: First name is required
@@ -34,11 +43,19 @@ fields:
   # tk_emailPlaceholder_: (common.yml > user)
   tk_password_: Password
   tk_passwordError_: Password is required
+  tk_newPassword_: New password
+  tk_newPasswordError_: New password is required
+  tk_confirmPassword_: Confirm password
+  tk_passwordMinLength_: The password must contain at least 6 characters
+  tk_confirmPasswordError_: Confirm password is required
+  tk_passwordsDoNotMatchError_: Passwords must match
   tk_passwordDescription_: The password must contain at least 6 characters
 
 callToAction:
   tk_signin_: Sign in
   tk_backToSignin_: Back to sign in
+  tk_askForNewLink_: Ask for a new reset password link
   tk_forgotPassword_: Forgot your password?
   tk_sendResetPasswordLink_: Send reset password link
+  tk_updatePassword_: Update password
   tk_signup_: Sign up

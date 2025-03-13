@@ -24,6 +24,15 @@ resetPasswordRequest:
   tk_successTitle_: Lien de réinitialisation envoyé
   tk_successDescription_: Vérifiez votre boite email!
 
+resetPassword:
+  tk_title_: Nouveau mot de passe
+  tk_description_: Mettez à jour votre mot de passe
+  tk_missingTokenError_: Un token de réinitialisation est requis pour réinitialiser votre mot de passe.
+  tk_invalidTokenError_: Le token de réinitialisation semble être invalide.
+  tk_successTitle_: Mot de passe mis à jour avec succès
+  tk_successDescription_: Prêt à vous connecter ?
+  tk_verifyPasswordUpdatedDescription_: Vous pouvez maintenant vous connecter avec votre nouveau mot de passe.
+
 fields:
   # tk_firstName_: (common.yml > user)
   tk_firstNameError_: Le prénom est requis
@@ -36,11 +45,19 @@ fields:
   # tk_emailPlaceholder_: (common.yml > user)
   tk_password_: Mot de passe
   tk_passwordError_: Le mot de passe est requis
+  tk_newPassword_: Nouveau mot de passe
+  tk_newPasswordError_: Le nouveau mot de passe est requis
+  tk_confirmPassword_: Confirmer le mot de passe
+  tk_passwordMinLength_: Le mot de passe doit contenir au moins 6 caractères
+  tk_confirmPasswordError_: Le mot de passe de confirmation est requis
+  tk_passwordsDoNotMatchError_: Les mots de passe ne correspondent pas
   tk_passwordDescription_: Le mot de passe doit contenir au moins 6 caractères
 
 callToAction:
   tk_signin_: Connexion
   tk_backToSignin_: Retour à la page de connexion
+  tk_askForNewLink_: Demander un nouveau lien de réinitialisation
   tk_forgotPassword_: Mot de passe oublié ?
   tk_sendResetPasswordLink_: Envoyer le lien de réinitialisation
+  tk_updatePassword_: Mettre à jour le mot de passe
   tk_signup_: Créer un compte

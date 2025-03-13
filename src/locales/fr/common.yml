@@ -4,16 +4,16 @@ version:
 
 user:
   tk_firstName_: Prénom
-  tk_firstNamePlaceholder_: Bruce
+  tk_firstNamePlaceholder_: Bill
   tk_lastName_: Nom
-  tk_lastNamePlaceholder_: Wayne
+  tk_lastNamePlaceholder_: Matt
   tk_email_: Email
-  tk_emailPlaceholder_: bruce.wayne@wayne-enterprises.com
+  tk_emailPlaceholder_: bill.matt@billmate.com
 
 loading:
   tk_loadingSignin_: 'Connexion en cours...'
   tk_loadingCreate_: 'Création en cours...'
   tk_loadingSend_: 'Envoi en cours...'
-
+  tk_loadingUpdate_: 'Mise à jour en cours...'
 other:
   tk_or_: 'ou'
