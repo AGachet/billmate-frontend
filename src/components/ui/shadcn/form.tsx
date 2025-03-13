@@ -1,10 +1,10 @@
-import * as React from 'react'
 import * as LabelPrimitive from '@radix-ui/react-label'
 import { Slot } from '@radix-ui/react-slot'
+import * as React from 'react'
 import { Controller, FormProvider, useFormContext, type ControllerProps, type FieldPath, type FieldValues } from 'react-hook-form'
 
+import { Label } from '@/components/ui/shadcn/label'
 import { cn } from '@/lib/utils'
-import { Label } from '@/components/ui/label'
 
 const Form = FormProvider
 
@@ -99,4 +99,4 @@ const FormMessage = React.forwardRef<HTMLParagraphElement, React.HTMLAttributes<
 })
 FormMessage.displayName = 'FormMessage'
 
-export { useFormField, Form, FormItem, FormLabel, FormControl, FormDescription, FormMessage, FormField }
+export { Form, FormControl, FormDescription, FormField, FormItem, FormLabel, FormMessage, useFormField }

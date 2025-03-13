@@ -1,14 +1,14 @@
-import globals from 'globals'
+import jsoncPlugin from 'eslint-plugin-jsonc'
+import prettier from 'eslint-plugin-prettier'
 import reactHooks from 'eslint-plugin-react-hooks'
 import reactRefresh from 'eslint-plugin-react-refresh'
-import prettier from 'eslint-plugin-prettier'
-import jsoncPlugin from 'eslint-plugin-jsonc'
+import globals from 'globals'
 import tseslint from 'typescript-eslint'
 import noVersionPrefixPlugin from './eslint-rules/no-version-prefix.js'
 
 export default [
   {
-    ignores: ['dist', 'node_modules']
+    ignores: ['dist', 'node_modules', 'src/components/ui/shadcn/**']
   },
 
   ...tseslint.configs.recommended,

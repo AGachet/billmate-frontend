@@ -6,10 +6,10 @@ import { Outlet } from 'react-router-dom'
 /**
  * Components
  */
-import { Separator } from '@/components/ui/separator'
 import { LayoutSidebar } from '@/components/layout/layout-sidebar'
-import { SidebarInset, SidebarProvider, SidebarTrigger } from '@/components/ui/sidebar'
-import { Breadcrumb, BreadcrumbItem, BreadcrumbLink, BreadcrumbList, BreadcrumbPage, BreadcrumbSeparator } from '@/components/ui/breadcrumb'
+import { Breadcrumb, BreadcrumbItem, BreadcrumbLink, BreadcrumbList, BreadcrumbPage, BreadcrumbSeparator } from '@/components/ui/shadcn/breadcrumb'
+import { Separator } from '@/components/ui/shadcn/separator'
+import { SidebarInset, SidebarProvider, SidebarTrigger } from '@/components/ui/shadcn/sidebar'
 
 /**
  * React declaration

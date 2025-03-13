@@ -8,29 +8,29 @@ import { useTranslation } from 'react-i18next'
  * Icons
  */
 import {
-  ClipboardList,
-  Package,
   AudioWaveform,
-  FileText,
-  Command,
-  GalleryVerticalEnd,
-  Users,
-  Handshake,
-  ContactRound,
   Building,
-  ShoppingBag,
-  HandCoins,
   Car,
-  Signature,
+  ChartNoAxesCombined,
+  ClipboardList,
   Coins,
-  ChartNoAxesCombined
+  Command,
+  ContactRound,
+  FileText,
+  GalleryVerticalEnd,
+  HandCoins,
+  Handshake,
+  Package,
+  ShoppingBag,
+  Signature,
+  Users
 } from 'lucide-react'
 
 /**
  * Components
  */
-import { useSidebar, Sidebar, SidebarContent, SidebarFooter, SidebarHeader, SidebarRail } from '@/components/ui/sidebar'
-import { Button } from '@/components/ui/button'
+import { Button } from '@/components/ui/shadcn/button'
+import { Sidebar, SidebarContent, SidebarFooter, SidebarHeader, SidebarRail, useSidebar } from '@/components/ui/shadcn/sidebar'
 
 import { TeamSwitcher } from '@/components/layout/team-switcher'
 import { NavSection } from '@/components/nav/nav-section'
@@ -39,8 +39,8 @@ import { NavUser } from '@/components/nav/nav-user'
 /**
  * TS Types
  */
-import type { ComponentProps } from 'react'
 import type { NavSectionItem } from '@/components/nav/nav-section'
+import type { ComponentProps } from 'react'
 
 type User = {
   firstname: string
