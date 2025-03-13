@@ -14,6 +14,14 @@ signin:
   tk_noAccount_: Don't have an account?
   tk_authError_: The provided credentials do not match any account.
 
+resetPasswordRequest:
+  tk_title_: Reset password request
+  tk_description_: Reset your password
+  tk_verifyResetPasswordDescription_: If an account exists with the address {{ userEmail }}, you should receive an email containing a reset link. Don't waste time, it's only valid for 10 minutes.
+  tk_checkSpam_: If you don't see the email, please check your spam folder.
+  tk_successTitle_: Reset link sent
+  tk_successDescription_: Check your email!
+
 fields:
   # tk_firstName_: (common.yml > user)
   tk_firstNameError_: First name is required
@@ -30,5 +38,7 @@ fields:
 
 callToAction:
   tk_signin_: Sign in
+  tk_backToSignin_: Back to sign in
   tk_forgotPassword_: Forgot your password?
+  tk_sendResetPasswordLink_: Send reset password link
   tk_signup_: Sign up

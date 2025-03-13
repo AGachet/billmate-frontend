@@ -7,13 +7,22 @@ signup:
     heures.
   tk_checkSpam_: Si vous ne voyez pas l'email, veuillez vérifier votre dossier spam.
   tk_successTitle_: Compte créé avec succès
-  tk_successDescription_: Vérifiez votre email pour les instructions de vérification.
+  tk_successDescription_: Vérifiez votre boite email!
 
 signin:
   tk_title_: Connexion
   tk_description_: Accédez à votre compte
   tk_noAccount_: Vous n'avez pas de compte ?
   tk_authError_: Les informations fournies ne permettent pas de retrouver votre compte.
+
+resetPasswordRequest:
+  tk_title_: Demande de réinitialisation
+  tk_description_: Réinitialisez votre mot de passe
+  tk_verifyResetPasswordDescription_:
+    Si un compte existe avec l'adresse {{ userEmail }}, vous devriez recevoir un email contenant un lien de réinitialisation. Ne perdez pas de temps, il n'est valide que 10 minutes.
+  tk_checkSpam_: Si vous ne voyez pas l'email, veuillez vérifier votre dossier spam.
+  tk_successTitle_: Lien de réinitialisation envoyé
+  tk_successDescription_: Vérifiez votre boite email!
 
 fields:
   # tk_firstName_: (common.yml > user)
@@ -31,5 +40,7 @@ fields:
 
 callToAction:
   tk_signin_: Connexion
+  tk_backToSignin_: Retour à la page de connexion
   tk_forgotPassword_: Mot de passe oublié ?
+  tk_sendResetPasswordLink_: Envoyer le lien de réinitialisation
   tk_signup_: Créer un compte
