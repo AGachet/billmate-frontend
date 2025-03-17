@@ -15,5 +15,7 @@ loading:
   tk_loadingCreate_: 'Création en cours...'
   tk_loadingSend_: 'Envoi en cours...'
   tk_loadingUpdate_: 'Mise à jour en cours...'
+  tk_loading_: 'Chargement en cours...'
+
 other:
   tk_or_: 'ou'

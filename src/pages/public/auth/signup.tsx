@@ -1,11 +1,10 @@
 /**
- * Resources & configs
+ * Resources
  */
 import { zodResolver } from '@hookform/resolvers/zod'
 import { useState } from 'react'
 import { useForm } from 'react-hook-form'
 import { useTranslation } from 'react-i18next'
-import { z } from 'zod'
 
 /**
  * Components
@@ -16,21 +15,17 @@ import { Card, CardContent, CardDescription, CardFooter, CardHeader, CardTitle }
 import { Form, FormControl, FormDescription, FormField, FormItem, FormLabel, FormMessage } from '@/components/ui/shadcn/form'
 import { Input } from '@/components/ui/shadcn/input'
 import { Separator } from '@/components/ui/shadcn/separator'
-import { CheckCircle } from 'lucide-react'
 import { Link } from 'react-router-dom'
 
 /**
- * Form schema definition
+ * Icons
  */
-const createFormSchema = (tAuth: (key: string) => string) =>
-  z.object({
-    firstName: z.string().min(1, { message: tAuth('fields.tk_firstNameError_') }),
-    lastName: z.string().min(1, { message: tAuth('fields.tk_lastNameError_') }),
-    email: z.string().email({ message: tAuth('fields.tk_emailError_') }),
-    password: z.string().min(8, { message: tAuth('fields.tk_passwordError_') })
-  })
+import { AlertCircle, CheckCircle } from 'lucide-react'
 
-type FormSchemaType = z.infer<ReturnType<typeof createFormSchema>>
+/**
+ * API
+ */
+import { signUpPayloadSchema, useSignUp, type SignUpPayloadDto } from '@/hooks/api/auth'
 
 /**
  * React declaration
@@ -38,30 +33,28 @@ type FormSchemaType = z.infer<ReturnType<typeof createFormSchema>>
 export function SignUp() {
   const { t: tAuth } = useTranslation('auth')
   const { t: tCommon } = useTranslation('common')
-  const [isLoading, setIsLoading] = useState(false)
-  const [isRegistered, setIsRegistered] = useState(false)
   const [userEmail, setUserEmail] = useState('')
 
+  // React Query mutation
+  const signUpMutation = useSignUp()
+  const isRegistered = signUpMutation.isSuccess
+
   // Create form with schema
-  const form = useForm<FormSchemaType>({
-    resolver: zodResolver(createFormSchema(tAuth)),
+  const form = useForm<SignUpPayloadDto>({
+    resolver: zodResolver(signUpPayloadSchema),
     defaultValues: {
-      firstName: '',
-      lastName: '',
+      firstname: '',
+      lastname: '',
       email: '',
       password: ''
     }
   })
 
-  const onSubmit = (values: FormSchemaType) => {
-    setIsLoading(true)
+  const onSubmit = (values: SignUpPayloadDto) => {
     setUserEmail(values.email)
 
-    // Simulate registration
-    setTimeout(() => {
-      setIsLoading(false)
-      setIsRegistered(true)
-    }, 1000)
+    // Use the React Query mutation
+    signUpMutation.submit(values)
   }
 
   // Reusable form field
@@ -73,7 +66,7 @@ export function SignUp() {
     autoComplete = '',
     description = ''
   }: {
-    name: keyof FormSchemaType
+    name: keyof SignUpPayloadDto
     label: string
     placeholder?: string
     type?: string
@@ -134,14 +127,23 @@ export function SignUp() {
 
         <Form {...form}>
           <form onSubmit={form.handleSubmit(onSubmit)} className="mt-8 space-y-6">
+            {signUpMutation.isError && (
+              <Alert className="bg-red-50 text-red-800">
+                <div className="flex items-center gap-2">
+                  <AlertCircle className="h-5 w-5" />
+                  <AlertDescription>{tAuth('signup.tk_errorMessage_')}</AlertDescription>
+                </div>
+              </Alert>
+            )}
+
             <div className="grid grid-cols-2 gap-4">
               {renderFormField({
-                name: 'firstName',
+                name: 'firstname',
                 placeholder: tCommon('user.tk_firstNamePlaceholder_'),
                 label: tCommon('user.tk_firstName_')
               })}
               {renderFormField({
-                name: 'lastName',
+                name: 'lastname',
                 placeholder: tCommon('user.tk_lastNamePlaceholder_'),
                 label: tCommon('user.tk_lastName_')
               })}
@@ -163,8 +165,8 @@ export function SignUp() {
               description: tAuth('fields.tk_passwordDescription_')
             })}
 
-            <Button type="submit" className="w-full" disabled={isLoading}>
-              {isLoading ? tCommon('loading.tk_loadingCreate_') : tAuth('callToAction.tk_signup_')}
+            <Button type="submit" className="w-full" disabled={signUpMutation.isLoading}>
+              {signUpMutation.isLoading ? tCommon('loading.tk_loadingCreate_') : tAuth('callToAction.tk_signup_')}
             </Button>
 
             <div className="flex items-center justify-center">

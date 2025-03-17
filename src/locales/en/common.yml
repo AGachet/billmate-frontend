@@ -15,6 +15,7 @@ loading:
   tk_loadingSignin_: 'Signing in...'
   tk_loadingSend_: 'Sending...'
   tk_loadingUpdate_: 'Updating...'
+  tk_loading_: 'Loading...'
 
 other:
   tk_or_: 'or'

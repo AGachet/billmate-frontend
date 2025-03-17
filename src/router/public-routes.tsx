@@ -3,13 +3,16 @@
  */
 import { Navigate, RouteObject } from 'react-router-dom'
 
-import { auth } from '@/lib/auth'
-
 /**
  * Pages
  */
 import { ResetPassword, ResetPasswordRequest, SignIn, SignUp } from '@/pages/public/auth'
-import { NotFound } from '@/pages/public/not-found'
+import { NotFound } from '@/pages/public/errors/not-found'
+
+/**
+ * Components
+ */
+import { PublicOnlyRoute } from '@/router/routes-guard'
 
 /**
  * Routes
@@ -17,6 +20,7 @@ import { NotFound } from '@/pages/public/not-found'
 export const publicRoutes: RouteObject[] = [
   {
     path: '/',
+    element: <PublicOnlyRoute />,
     errorElement: <NotFound />,
     children: [
       {
@@ -25,19 +29,19 @@ export const publicRoutes: RouteObject[] = [
       },
       {
         path: 'signin',
-        element: auth.isAuthenticated() ? <Navigate to="/dashboard" replace /> : <SignIn />
+        element: <SignIn />
       },
       {
         path: 'signup',
-        element: auth.isAuthenticated() ? <Navigate to="/dashboard" replace /> : <SignUp />
+        element: <SignUp />
       },
       {
         path: 'reset-password-request',
-        element: auth.isAuthenticated() ? <Navigate to="/dashboard" replace /> : <ResetPasswordRequest />
+        element: <ResetPasswordRequest />
       },
       {
         path: 'reset-password',
-        element: auth.isAuthenticated() ? <Navigate to="/dashboard" replace /> : <ResetPassword />
+        element: <ResetPassword />
       }
       // Add other public routes here
     ]

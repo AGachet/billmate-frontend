@@ -1,8 +1,22 @@
 /**
- * Resources & configs
+ * Resources
  */
-import { cn } from '@/lib/utils'
+import { cn } from '@/utils/ui'
+
+/**
+ * Dependencies
+ */
 import { useTranslation } from 'react-i18next'
+
+/**
+ * Components
+ */
+import { Button } from '@/components/ui/shadcn/button'
+import { Sidebar, SidebarContent, SidebarFooter, SidebarHeader, SidebarRail, useSidebar } from '@/components/ui/shadcn/sidebar'
+
+import { TeamSwitcher } from '@/components/layout/team-switcher'
+import { NavSection } from '@/components/nav/nav-section'
+import { NavUser } from '@/components/nav/nav-user'
 
 /**
  * Icons
@@ -25,16 +39,6 @@ import {
   Signature,
   Users
 } from 'lucide-react'
-
-/**
- * Components
- */
-import { Button } from '@/components/ui/shadcn/button'
-import { Sidebar, SidebarContent, SidebarFooter, SidebarHeader, SidebarRail, useSidebar } from '@/components/ui/shadcn/sidebar'
-
-import { TeamSwitcher } from '@/components/layout/team-switcher'
-import { NavSection } from '@/components/nav/nav-section'
-import { NavUser } from '@/components/nav/nav-user'
 
 /**
  * TS Types

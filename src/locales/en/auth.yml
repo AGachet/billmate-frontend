@@ -50,6 +50,7 @@ fields:
   tk_confirmPasswordError_: Confirm password is required
   tk_passwordsDoNotMatchError_: Passwords must match
   tk_passwordDescription_: The password must contain at least 6 characters
+  tk_passwordComplexityError_: Password must contain at least 1 uppercase letter, 1 lowercase letter, and 1 number
 
 callToAction:
   tk_signin_: Sign in

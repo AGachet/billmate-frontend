@@ -1,10 +1,23 @@
-import { ChevronsUpDown, Plus } from 'lucide-react'
+/**
+ * Resources
+ */
 import { useState } from 'react'
 import { useTranslation } from 'react-i18next'
 
+/**
+ * Components
+ */
 import { DropdownMenu, DropdownMenuContent, DropdownMenuItem, DropdownMenuLabel, DropdownMenuSeparator, DropdownMenuShortcut, DropdownMenuTrigger } from '@/components/ui/shadcn/dropdown-menu'
 import { SidebarMenu, SidebarMenuButton, SidebarMenuItem, useSidebar } from '@/components/ui/shadcn/sidebar'
 
+/**
+ * Icons
+ */
+import { ChevronsUpDown, Plus } from 'lucide-react'
+
+/**
+ * React declaration
+ */
 export function TeamSwitcher({
   teams
 }: {

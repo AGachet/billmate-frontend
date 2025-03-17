@@ -11,8 +11,8 @@ import { Separator } from '@/components/ui/shadcn/separator'
 import { Sheet, SheetContent } from '@/components/ui/shadcn/sheet'
 import { Skeleton } from '@/components/ui/shadcn/skeleton'
 import { Tooltip, TooltipContent, TooltipProvider, TooltipTrigger } from '@/components/ui/shadcn/tooltip'
-import { useIsMobile } from '@/hooks/use-mobile'
-import { cn } from '@/lib/utils'
+import { useIsMobile } from '@/hooks/ui/useIsMobile'
+import { cn } from '@/utils/ui'
 
 const SIDEBAR_COOKIE_NAME = 'sidebar:state'
 const SIDEBAR_COOKIE_MAX_AGE = 60 * 60 * 24 * 7

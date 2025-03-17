@@ -1,18 +1,18 @@
 /**
- * Resources
+ * Dependencies
  */
 import { useTranslation } from 'react-i18next'
-
-/**
- * Icons
- */
-import { ChevronRight } from 'lucide-react'
 
 /**
  * Components
  */
 import { Collapsible, CollapsibleContent, CollapsibleTrigger } from '@/components/ui/shadcn/collapsible'
 import { SidebarGroup, SidebarGroupLabel, SidebarMenu, SidebarMenuButton, SidebarMenuItem, SidebarMenuSub, SidebarMenuSubButton, SidebarMenuSubItem } from '@/components/ui/shadcn/sidebar'
+
+/**
+ * Icons
+ */
+import { ChevronRight } from 'lucide-react'
 
 /**
  * TS Types

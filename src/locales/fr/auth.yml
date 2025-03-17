@@ -52,6 +52,7 @@ fields:
   tk_confirmPasswordError_: Le mot de passe de confirmation est requis
   tk_passwordsDoNotMatchError_: Les mots de passe ne correspondent pas
   tk_passwordDescription_: Le mot de passe doit contenir au moins 6 caractères
+  tk_passwordComplexityError_: Le mot de passe doit contenir au moins 1 lettre majuscule, 1 lettre minuscule et 1 chiffre
 
 callToAction:
   tk_signin_: Connexion

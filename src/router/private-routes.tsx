@@ -2,25 +2,25 @@
  * Resources
  */
 import { RouteObject } from 'react-router-dom'
-import { AuthGuard } from '@/router/auth-guard'
+
+/**
+ * Pages
+ */
+import { Dashboard } from '@/pages/private/dashboard'
 
 /**
  * Components
  */
 import { LayoutLogged } from '@/components/layout/layout-logged'
-
-/**
- * Pages
- */
-import { Dashboard } from '@/pages/logged/dashboard'
+import { PrivateOnlyRoute } from '@/router/routes-guard'
 
 /**
  * Routes
  */
-export const loggedRoutes: RouteObject[] = [
+export const privateRoutes: RouteObject[] = [
   {
     path: '/',
-    element: <AuthGuard />,
+    element: <PrivateOnlyRoute />,
     children: [
       {
         element: <LayoutLogged />,

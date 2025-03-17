@@ -6,10 +6,10 @@ import { createBrowserRouter } from 'react-router-dom'
 /**
  * Routes
  */
+import { privateRoutes } from './private-routes'
 import { publicRoutes } from './public-routes'
-import { loggedRoutes } from './logged-routes'
 
 /**
  * Router
  */
-export const router = createBrowserRouter([...publicRoutes, ...loggedRoutes])
+export const router = createBrowserRouter([...publicRoutes, ...privateRoutes])

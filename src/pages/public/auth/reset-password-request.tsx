@@ -1,12 +1,11 @@
 /**
- * Resources & configs
+ * Resources
  */
 import { zodResolver } from '@hookform/resolvers/zod'
 import { useState } from 'react'
 import { useForm } from 'react-hook-form'
 import { useTranslation } from 'react-i18next'
 import { Link } from 'react-router-dom'
-import { z } from 'zod'
 
 /**
  * Components
@@ -16,17 +15,16 @@ import { Button } from '@/components/ui/shadcn/button'
 import { Card, CardContent, CardDescription, CardFooter, CardHeader, CardTitle } from '@/components/ui/shadcn/card'
 import { Form, FormControl, FormField, FormItem, FormLabel, FormMessage } from '@/components/ui/shadcn/form'
 import { Input } from '@/components/ui/shadcn/input'
+
+/**
+ * Icons
+ */
 import { CheckCircle } from 'lucide-react'
 
 /**
- * Form schema definition
+ * API
  */
-const createFormSchema = (tAuth: (key: string) => string) =>
-  z.object({
-    email: z.string().email({ message: tAuth('fields.tk_emailError_') })
-  })
-
-type FormSchemaType = z.infer<ReturnType<typeof createFormSchema>>
+import { requestPasswordResetPayloadSchema, useRequestPasswordReset, type RequestPasswordResetPayloadDto } from '@/hooks/api/auth'
 
 /**
  * React declaration
@@ -34,27 +32,25 @@ type FormSchemaType = z.infer<ReturnType<typeof createFormSchema>>
 export function ResetPasswordRequest() {
   const { t: tAuth } = useTranslation('auth')
   const { t: tCommon } = useTranslation('common')
-  const [isLoading, setIsLoading] = useState(false)
-  const [isSubmitted, setIsSubmitted] = useState(false)
   const [userEmail, setUserEmail] = useState('')
 
+  // React Query mutation
+  const resetPasswordMutation = useRequestPasswordReset()
+  const isSubmitted = resetPasswordMutation.isSuccess
+
   // Create form with schema
-  const form = useForm<FormSchemaType>({
-    resolver: zodResolver(createFormSchema(tAuth)),
+  const form = useForm<RequestPasswordResetPayloadDto>({
+    resolver: zodResolver(requestPasswordResetPayloadSchema),
     defaultValues: {
       email: ''
     }
   })
 
-  const onSubmit = (values: FormSchemaType) => {
-    setIsLoading(true)
+  const onSubmit = (values: RequestPasswordResetPayloadDto) => {
     setUserEmail(values.email)
 
-    // Simulate API request
-    setTimeout(() => {
-      setIsSubmitted(true)
-      setIsLoading(false)
-    }, 1000)
+    // Utiliser la mutation React Query
+    resetPasswordMutation.submit(values)
   }
 
   // Reusable form field component with destructured arguments
@@ -65,7 +61,7 @@ export function ResetPasswordRequest() {
     type = 'text',
     autoComplete = ''
   }: {
-    name: keyof FormSchemaType
+    name: keyof RequestPasswordResetPayloadDto
     label: string
     placeholder?: string
     type?: string
@@ -124,6 +120,12 @@ export function ResetPasswordRequest() {
 
         <Form {...form}>
           <form onSubmit={form.handleSubmit(onSubmit)} className="mt-8 space-y-6">
+            {resetPasswordMutation.isError && (
+              <Alert className="bg-red-50 text-red-800">
+                <AlertDescription>{tAuth('resetPasswordRequest.tk_errorMessage_')}</AlertDescription>
+              </Alert>
+            )}
+
             {renderFormField({
               name: 'email',
               label: tCommon('user.tk_email_'),
@@ -132,8 +134,8 @@ export function ResetPasswordRequest() {
               autoComplete: 'email'
             })}
 
-            <Button type="submit" className="w-full" disabled={isLoading}>
-              {isLoading ? tCommon('loading.tk_loadingSend_') : tAuth('callToAction.tk_sendResetPasswordLink_')}
+            <Button type="submit" className="w-full" disabled={resetPasswordMutation.isLoading}>
+              {resetPasswordMutation.isLoading ? tCommon('loading.tk_loadingSend_') : tAuth('callToAction.tk_sendResetPasswordLink_')}
             </Button>
 
             <div className="text-center">

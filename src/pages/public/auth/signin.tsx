@@ -1,14 +1,16 @@
 /**
- * Resources & configs
+ * Resources
  */
 import { zodResolver } from '@hookform/resolvers/zod'
 import { useEffect, useState } from 'react'
 import { useForm } from 'react-hook-form'
 import { useTranslation } from 'react-i18next'
-import { Link, useLocation, useNavigate } from 'react-router-dom'
-import { z } from 'zod'
+import { Link, useNavigate } from 'react-router-dom'
 
-import { auth } from '@/lib/auth'
+/**
+ * Dependencies
+ */
+import { extractTokenFromUrl } from '@/utils/tokenExtractor'
 
 /**
  * Components
@@ -19,83 +21,61 @@ import { Card } from '@/components/ui/shadcn/card'
 import { Form, FormControl, FormField, FormItem, FormLabel, FormMessage } from '@/components/ui/shadcn/form'
 import { Input } from '@/components/ui/shadcn/input'
 import { Separator } from '@/components/ui/shadcn/separator'
+
+/**
+ * Icons
+ */
 import { AlertCircle } from 'lucide-react'
 
 /**
- * Form schema definition
+ * API
  */
-const createFormSchema = (tAuth: (key: string) => string) =>
-  z.object({
-    email: z.string().email({ message: tAuth('fields.tk_emailError_') }),
-    password: z.string().min(1, { message: tAuth('fields.tk_passwordError_') })
-  })
-
-type FormSchemaType = z.infer<ReturnType<typeof createFormSchema>>
+import { signInPayloadSchema, useSignIn, type SignInPayloadDto } from '@/hooks/api/auth'
+import { useIsSessionActive } from '@/hooks/auth/session'
 
 /**
  * React declaration
  */
 export function SignIn() {
   const navigate = useNavigate()
-  const location = useLocation()
   const { t: tAuth } = useTranslation('auth')
   const { t: tCommon } = useTranslation('common')
-  const [isLoading, setIsLoading] = useState(false)
   const [authError, setAuthError] = useState<string | null>(null)
-  const [confirmAccountToken, setConfirmAccountToken] = useState<string | null>(null)
+  const [confirmAccountToken] = useState(() => extractTokenFromUrl('confirmAccountToken'))
 
-  // Extract confirmAccountToken from URL if present
-  useEffect(() => {
-    const searchParams = new URLSearchParams(location.search)
-    const token = searchParams.get('confirmAccountToken')
-
-    if (token) {
-      setConfirmAccountToken(token)
-
-      // Remove the token from URL to prevent reconfirmation on refresh
-      const newUrl = window.location.pathname
-      window.history.replaceState({}, document.title, newUrl)
-    }
-  }, [location.search])
+  // React Query mutation
+  const signInMutation = useSignIn()
+  const { isSessionActive } = useIsSessionActive()
 
   // Create form with schema
-  const form = useForm<FormSchemaType>({
-    resolver: zodResolver(createFormSchema(tAuth)),
+  const form = useForm<SignInPayloadDto>({
+    resolver: zodResolver(signInPayloadSchema),
     defaultValues: {
       email: '',
       password: ''
     }
   })
 
-  const onSubmit = (values: FormSchemaType) => {
-    setIsLoading(true)
+  // Redirect on successful login
+  useEffect(() => {
+    if (signInMutation.isSuccess || isSessionActive) navigate('/dashboard')
+  }, [isSessionActive, signInMutation.isSuccess, navigate])
+
+  const onSubmit = (values: SignInPayloadDto) => {
     setAuthError(null)
 
-    // Simulate authentication with or without token
-    setTimeout(() => {
-      try {
-        // Simulate authentication logic
-        const isValidCredentials = values.email.includes('@') && values.password.length >= 6
-
-        if (!isValidCredentials) throw new Error('invalid_credentials')
-
-        // If we have a token, we would send it along with the credentials
-        if (confirmAccountToken) {
-          console.log('Confirming account with token:', confirmAccountToken)
-          // In a real app, you would send this token to your API
-          // api.confirmAccount(values.email, values.password, confirmAccountToken)
+    // Utiliser la mutation React Query
+    signInMutation.submit(
+      {
+        ...values,
+        confirmAccountToken: confirmAccountToken || undefined
+      },
+      {
+        onError: () => {
+          setAuthError(tAuth('signin.tk_authError_'))
         }
-
-        // If everything is successful
-        auth.setToken('fake-token')
-        navigate('/dashboard')
-      } catch {
-        // Generic error message for any authentication issue
-        setAuthError(tAuth('signin.tk_authError_'))
-      } finally {
-        setIsLoading(false)
       }
-    }, 1000)
+    )
   }
 
   // Reusable form field
@@ -104,13 +84,15 @@ export function SignIn() {
     label,
     placeholder = '',
     type = 'text',
-    autoComplete = ''
+    autoComplete = '',
+    tabIndex
   }: {
-    name: keyof FormSchemaType
+    name: keyof SignInPayloadDto
     label: string
     placeholder?: string
     type?: string
     autoComplete?: string
+    tabIndex?: number
   }) => (
     <FormField
       control={form.control}
@@ -128,7 +110,7 @@ export function SignIn() {
             <FormLabel>{label}</FormLabel>
           )}
           <FormControl>
-            <Input placeholder={placeholder} type={type} autoComplete={autoComplete} {...field} />
+            <Input placeholder={placeholder} type={type} autoComplete={autoComplete} tabIndex={tabIndex} {...field} />
           </FormControl>
           <FormMessage />
         </FormItem>
@@ -146,11 +128,11 @@ export function SignIn() {
 
         <Form {...form}>
           <form onSubmit={form.handleSubmit(onSubmit)} className="mt-8 space-y-6">
-            {authError && (
+            {(authError || signInMutation.isError) && (
               <Alert className="bg-red-50 text-red-800">
                 <div className="flex items-center gap-2">
                   <AlertCircle className="h-5 w-5" />
-                  <AlertDescription>{authError}</AlertDescription>
+                  <AlertDescription>{authError || tAuth('signin.tk_authError_')}</AlertDescription>
                 </div>
               </Alert>
             )}
@@ -160,17 +142,19 @@ export function SignIn() {
               label: tCommon('user.tk_email_'),
               placeholder: tCommon('user.tk_emailPlaceholder_'),
               type: 'email',
-              autoComplete: 'email'
+              autoComplete: 'email',
+              tabIndex: 1
             })}
             {renderFormField({
               name: 'password',
               label: tAuth('fields.tk_password_'),
               type: 'password',
-              autoComplete: 'current-password'
+              autoComplete: 'current-password',
+              tabIndex: 2
             })}
 
-            <Button type="submit" className="w-full" disabled={isLoading}>
-              {isLoading ? tCommon('loading.tk_loadingSignin_') : tAuth('callToAction.tk_signin_')}
+            <Button type="submit" className="w-full" disabled={signInMutation.isLoading} tabIndex={3}>
+              {signInMutation.isLoading ? tCommon('loading.tk_loadingSignin_') : tAuth('callToAction.tk_signin_')}
             </Button>
 
             <div className="flex items-center justify-center">
