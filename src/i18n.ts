@@ -2,9 +2,9 @@
  * Resources & configs
  */
 import i18n from 'i18next'
-import { initReactI18next } from 'react-i18next'
 import ResourcesToBackend from 'i18next-resources-to-backend'
 import yaml from 'js-yaml'
+import { initReactI18next } from 'react-i18next'
 
 /**
  * Methods
@@ -31,7 +31,7 @@ i18n
     fallbackLng: 'en',
     debug: false,
     interpolation: { escapeValue: false },
-    ns: ['common', 'nav', 'auth'],
+    ns: ['common', 'nav', 'auth', 'page-errors'],
     defaultNS: 'common'
   })
 
