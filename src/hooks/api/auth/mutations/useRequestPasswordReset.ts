@@ -16,30 +16,39 @@ const tAuth = (key: string) => i18next.t(key, { ns: 'auth' })
 /**
  * Schemas & DTOs
  */
-export const requestPasswordResetPayloadSchema = z.object({
-  email: z.string().email({ message: tAuth('fields.tk_emailError_') })
-})
+export const useRequestPasswordResetSchema = () => {
+  const payload = z.object({
+    email: z
+      .string()
+      .min(1, { message: tAuth('fields.tk_emailRequired_') })
+      .email({ message: tAuth('fields.tk_emailError_') })
+  })
 
-export const requestPasswordResetResponseSchema = z.object({
-  message: z.string(),
-  resetToken: z.string().optional()
-})
+  const response = z.object({
+    message: z.string(),
+    resetToken: z.string().optional()
+  })
 
-export type RequestPasswordResetPayloadDto = z.infer<typeof requestPasswordResetPayloadSchema>
-export type RequestPasswordResetResponseDto = z.infer<typeof requestPasswordResetResponseSchema>
+  return { payload, response }
+}
+
+export type RequestPasswordResetPayloadDto = z.infer<ReturnType<typeof useRequestPasswordResetSchema>['payload']>
+export type RequestPasswordResetResponseDto = z.infer<ReturnType<typeof useRequestPasswordResetSchema>['response']>
 
 /**
  * Hook declaration
  */
 export const useRequestPasswordReset = () => {
+  const schemas = useRequestPasswordResetSchema()
+
   const mutation = useMutation({
     mutationFn: async (data: RequestPasswordResetPayloadDto) => {
       // Schema validation
-      requestPasswordResetPayloadSchema.parse(data)
+      schemas.payload.parse(data)
 
       // Send data to the API
       const response = await apiClient.post<RequestPasswordResetResponseDto>('/auth/request-password-reset', data)
-      return requestPasswordResetResponseSchema.parse(response)
+      return schemas.response.parse(response)
     },
     onError: (error) => {
       console.error(tAuth('errors.tk_requestPasswordResetError_'), error)

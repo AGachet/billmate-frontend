@@ -30,7 +30,7 @@ import { AlertCircle } from 'lucide-react'
 /**
  * API
  */
-import { signInPayloadSchema, useSignIn, type SignInPayloadDto } from '@/hooks/api/auth'
+import { useSignIn, useSignInSchema, type SignInPayloadDto } from '@/hooks/api/auth'
 import { useIsSessionActive } from '@/hooks/auth/session'
 
 /**
@@ -48,8 +48,9 @@ export function SignIn() {
   const { isSessionActive } = useIsSessionActive()
 
   // Create form with schema
+  const schemas = useSignInSchema()
   const form = useForm<SignInPayloadDto>({
-    resolver: zodResolver(signInPayloadSchema),
+    resolver: zodResolver(schemas.payload),
     defaultValues: {
       email: '',
       password: ''
@@ -64,7 +65,7 @@ export function SignIn() {
   const onSubmit = (values: SignInPayloadDto) => {
     setAuthError(null)
 
-    // Utiliser la mutation React Query
+    // Use React Query mutation
     signInMutation.submit(
       {
         ...values,

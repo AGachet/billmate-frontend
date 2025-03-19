@@ -8,6 +8,7 @@ signup:
   tk_checkSpam_: Si vous ne voyez pas l'email, veuillez vérifier votre dossier spam.
   tk_successTitle_: Compte créé avec succès
   tk_successDescription_: Vérifiez votre boite email!
+  tk_errorMessage_: Une erreur est survenue lors de la création du compte.
 
 signin:
   tk_title_: Connexion
@@ -23,6 +24,7 @@ resetPasswordRequest:
   tk_checkSpam_: Si vous ne voyez pas l'email, veuillez vérifier votre dossier spam.
   tk_successTitle_: Lien de réinitialisation envoyé
   tk_successDescription_: Vérifiez votre boite email!
+  tk_errorMessage_: Une erreur est survenue lors de la demande de réinitialisation.
 
 resetPassword:
   tk_title_: Nouveau mot de passe
@@ -41,17 +43,16 @@ fields:
   tk_lastNameError_: Le nom est requis
   # tk_lastNamePlaceholder_: (common.yml > user)
   # tk_email_: (common.yml > user)
+  tk_emailRequired_: L'email est requis
   tk_emailError_: L'email est invalide
   # tk_emailPlaceholder_: (common.yml > user)
   tk_password_: Mot de passe
-  tk_passwordError_: Le mot de passe est requis
+  tk_passwordRequired_: Le mot de passe est requis
   tk_newPassword_: Nouveau mot de passe
-  tk_newPasswordError_: Le nouveau mot de passe est requis
   tk_confirmPassword_: Confirmer le mot de passe
   tk_passwordMinLength_: Le mot de passe doit contenir au moins 6 caractères
   tk_confirmPasswordError_: Le mot de passe de confirmation est requis
   tk_passwordsDoNotMatchError_: Les mots de passe ne correspondent pas
-  tk_passwordDescription_: Le mot de passe doit contenir au moins 6 caractères
   tk_passwordComplexityError_: Le mot de passe doit contenir au moins 1 lettre majuscule, 1 lettre minuscule et 1 chiffre
 
 callToAction:

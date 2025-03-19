@@ -14,7 +14,7 @@ import { Link } from 'react-router-dom'
 import { Alert, AlertDescription } from '@/components/ui/shadcn/alert'
 import { Button } from '@/components/ui/shadcn/button'
 import { Card, CardContent, CardDescription, CardFooter, CardHeader, CardTitle } from '@/components/ui/shadcn/card'
-import { Form, FormControl, FormDescription, FormField, FormItem, FormLabel, FormMessage } from '@/components/ui/shadcn/form'
+import { Form, FormControl, FormField, FormItem, FormLabel, FormMessage } from '@/components/ui/shadcn/form'
 import { Input } from '@/components/ui/shadcn/input'
 
 /**
@@ -25,7 +25,7 @@ import { AlertCircle, CheckCircle } from 'lucide-react'
 /**
  * API
  */
-import { resetPasswordPayloadSchema, useResetPassword, type ResetPasswordPayloadDto } from '@/hooks/api/auth'
+import { useResetPassword, useResetPasswordSchema, type ResetPasswordPayloadDto } from '@/hooks/api/auth'
 
 /**
  * React declaration
@@ -47,8 +47,9 @@ export function ResetPassword() {
   }, [resetPasswordToken, tAuth])
 
   // Create form with schema
+  const schemas = useResetPasswordSchema()
   const form = useForm<ResetPasswordPayloadDto>({
-    resolver: zodResolver(resetPasswordPayloadSchema),
+    resolver: zodResolver(schemas.payload),
     defaultValues: {
       resetPasswordToken: '',
       password: '',
@@ -71,15 +72,13 @@ export function ResetPassword() {
     label,
     placeholder = '',
     type = 'text',
-    autoComplete = '',
-    description = ''
+    autoComplete = ''
   }: {
     name: keyof ResetPasswordPayloadDto
     label: string
     placeholder?: string
     type?: string
     autoComplete?: string
-    description?: string
   }) => (
     <FormField
       control={form.control}
@@ -90,7 +89,6 @@ export function ResetPassword() {
           <FormControl>
             <Input placeholder={placeholder} type={type} autoComplete={autoComplete} {...field} />
           </FormControl>
-          {description && <FormDescription>{description}</FormDescription>}
           <FormMessage />
         </FormItem>
       )}

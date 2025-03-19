@@ -7,6 +7,7 @@ signup:
   tk_checkSpam_: If you don't see the email, please check your spam folder.
   tk_successTitle_: Account created successfully
   tk_successDescription_: Check your email for verification instructions.
+  tk_errorMessage_: An error occurred while creating the account.
 
 signin:
   tk_title_: Sign in
@@ -21,6 +22,7 @@ resetPasswordRequest:
   tk_checkSpam_: If you don't see the email, please check your spam folder.
   tk_successTitle_: Reset link sent
   tk_successDescription_: Check your email!
+  tk_errorMessage_: An error occurred while requesting a password reset link.
 
 resetPassword:
   tk_title_: New password
@@ -39,17 +41,16 @@ fields:
   tk_lastNameError_: Last name is required
   # tk_lastNamePlaceholder_: (common.yml > user)
   # tk_email_: (common.yml > user)
+  tk_emailRequired_: Email is required
   tk_emailError_: Email is invalid
   # tk_emailPlaceholder_: (common.yml > user)
   tk_password_: Password
-  tk_passwordError_: Password is required
+  tk_passwordRequired_: Password is required
   tk_newPassword_: New password
-  tk_newPasswordError_: New password is required
   tk_confirmPassword_: Confirm password
-  tk_passwordMinLength_: The password must contain at least 6 characters
+  tk_passwordMinLength_: Password must contain at least 6 characters
   tk_confirmPasswordError_: Confirm password is required
-  tk_passwordsDoNotMatchError_: Passwords must match
-  tk_passwordDescription_: The password must contain at least 6 characters
+  tk_passwordsDoNotMatchError_: Passwords do not match
   tk_passwordComplexityError_: Password must contain at least 1 uppercase letter, 1 lowercase letter, and 1 number
 
 callToAction:
