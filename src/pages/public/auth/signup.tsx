@@ -12,7 +12,7 @@ import { useTranslation } from 'react-i18next'
 import { Alert, AlertDescription } from '@/components/ui/shadcn/alert'
 import { Button } from '@/components/ui/shadcn/button'
 import { Card, CardContent, CardDescription, CardFooter, CardHeader, CardTitle } from '@/components/ui/shadcn/card'
-import { Form, FormControl, FormDescription, FormField, FormItem, FormLabel, FormMessage } from '@/components/ui/shadcn/form'
+import { Form, FormControl, FormField, FormItem, FormLabel, FormMessage } from '@/components/ui/shadcn/form'
 import { Input } from '@/components/ui/shadcn/input'
 import { Separator } from '@/components/ui/shadcn/separator'
 import { Link } from 'react-router-dom'
@@ -25,7 +25,7 @@ import { AlertCircle, CheckCircle } from 'lucide-react'
 /**
  * API
  */
-import { signUpPayloadSchema, useSignUp, type SignUpPayloadDto } from '@/hooks/api/auth'
+import { useSignUp, useSignUpSchema, type SignUpPayloadDto } from '@/hooks/api/auth'
 
 /**
  * React declaration
@@ -40,8 +40,9 @@ export function SignUp() {
   const isRegistered = signUpMutation.isSuccess
 
   // Create form with schema
+  const schemas = useSignUpSchema()
   const form = useForm<SignUpPayloadDto>({
-    resolver: zodResolver(signUpPayloadSchema),
+    resolver: zodResolver(schemas.payload),
     defaultValues: {
       firstname: '',
       lastname: '',
@@ -63,15 +64,13 @@ export function SignUp() {
     label,
     placeholder = '',
     type = 'text',
-    autoComplete = '',
-    description = ''
+    autoComplete = ''
   }: {
     name: keyof SignUpPayloadDto
     label: string
     placeholder?: string
     type?: string
     autoComplete?: string
-    description?: string
   }) => (
     <FormField
       control={form.control}
@@ -82,7 +81,6 @@ export function SignUp() {
           <FormControl>
             <Input placeholder={placeholder} type={type} autoComplete={autoComplete} {...field} />
           </FormControl>
-          {description && <FormDescription>{description}</FormDescription>}
           <FormMessage />
         </FormItem>
       )}
@@ -161,8 +159,7 @@ export function SignUp() {
               name: 'password',
               label: tAuth('fields.tk_password_'),
               type: 'password',
-              autoComplete: 'new-password',
-              description: tAuth('fields.tk_passwordDescription_')
+              autoComplete: 'new-password'
             })}
 
             <Button type="submit" className="w-full" disabled={signUpMutation.isLoading}>

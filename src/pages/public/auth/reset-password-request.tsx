@@ -24,7 +24,7 @@ import { CheckCircle } from 'lucide-react'
 /**
  * API
  */
-import { requestPasswordResetPayloadSchema, useRequestPasswordReset, type RequestPasswordResetPayloadDto } from '@/hooks/api/auth'
+import { useRequestPasswordReset, useRequestPasswordResetSchema, type RequestPasswordResetPayloadDto } from '@/hooks/api/auth'
 
 /**
  * React declaration
@@ -39,8 +39,9 @@ export function ResetPasswordRequest() {
   const isSubmitted = resetPasswordMutation.isSuccess
 
   // Create form with schema
+  const schemas = useRequestPasswordResetSchema()
   const form = useForm<RequestPasswordResetPayloadDto>({
-    resolver: zodResolver(requestPasswordResetPayloadSchema),
+    resolver: zodResolver(schemas.payload),
     defaultValues: {
       email: ''
     }

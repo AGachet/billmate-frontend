@@ -17,33 +17,41 @@ const tAuth = (key: string) => i18next.t(key, { ns: 'auth' })
 /**
  * Schemas & DTOs
  */
-export const signInPayloadSchema = z.object({
-  email: z.string().email({ message: tAuth('fields.tk_emailError_') }),
-  password: z.string().min(1, { message: tAuth('fields.tk_passwordError_') }),
-  confirmAccountToken: z.string().optional()
-})
+export const useSignInSchema = () => {
+  const payload = z.object({
+    email: z
+      .string()
+      .min(1, { message: tAuth('fields.tk_emailRequired_') })
+      .email({ message: tAuth('fields.tk_emailError_') }),
+    password: z.string().min(1, { message: tAuth('fields.tk_passwordRequired_') }),
+    confirmAccountToken: z.string().optional()
+  })
 
-export const signInResponseSchema = z.object({
-  userId: z.string()
-})
+  const response = z.object({
+    userId: z.string()
+  })
 
-export type SignInPayloadDto = z.infer<typeof signInPayloadSchema>
-export type SignInResponseDto = z.infer<typeof signInResponseSchema>
+  return { payload, response }
+}
+
+export type SignInPayloadDto = z.infer<ReturnType<typeof useSignInSchema>['payload']>
+export type SignInResponseDto = z.infer<ReturnType<typeof useSignInSchema>['response']>
 
 /**
  * Hook declaration
  */
 export const useSignIn = () => {
   const me = useMe()
+  const schemas = useSignInSchema()
 
   const mutation = useMutation({
     mutationFn: async (data: SignInPayloadDto) => {
       // Schema validation
-      signInPayloadSchema.parse(data)
+      schemas.payload.parse(data)
 
       // Send data to the API
       const response = await apiClient.post<SignInResponseDto>('/auth/signin', data)
-      return signInResponseSchema.parse(response)
+      return schemas.response.parse(response)
     },
     onSuccess: async () => {
       // Fetch user profile

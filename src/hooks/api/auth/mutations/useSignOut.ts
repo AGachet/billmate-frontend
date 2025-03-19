@@ -22,16 +22,19 @@ import type { MeResponseDto } from '@/hooks/api/auth/queries/useMe'
 /**
  * Schemas & DTOs
  */
-export const signOutPayloadSchema = z.object({
-  userId: z.string()
-})
+export const useSignOutSchema = () => {
+  const payload = z.object({
+    userId: z.string()
+  })
 
-export const signOutResponseSchema = z.object({
-  message: z.string()
-})
+  const response = z.object({
+    message: z.string()
+  })
+  return { payload, response }
+}
 
-export type SignOutPayloadDto = z.infer<typeof signOutPayloadSchema>
-export type SignOutResponseDto = z.infer<typeof signOutResponseSchema>
+export type SignOutPayloadDto = z.infer<ReturnType<typeof useSignOutSchema>['payload']>
+export type SignOutResponseDto = z.infer<ReturnType<typeof useSignOutSchema>['response']>
 
 /**
  * Hook declaration
@@ -39,6 +42,7 @@ export type SignOutResponseDto = z.infer<typeof signOutResponseSchema>
 export const useSignOut = () => {
   const queryClient = useQueryClient()
   const navigate = useNavigate()
+  const schemas = useSignOutSchema()
 
   // Get user data from cache
   const me = queryClient.getQueryData<MeResponseDto>(['authMe'])
@@ -50,11 +54,11 @@ export const useSignOut = () => {
       const payload: SignOutPayloadDto = {
         userId: me.userId
       }
-      signOutPayloadSchema.parse(payload)
+      schemas.payload.parse(payload)
 
       // Send data to the API
       const response = await apiClient.post<SignOutResponseDto>('/auth/signout', payload)
-      return signOutResponseSchema.parse(response)
+      return schemas.response.parse(response)
     },
     onSuccess: () => {
       // Invalidate and reset auth status
