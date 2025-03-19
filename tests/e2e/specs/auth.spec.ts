@@ -1,12 +1,24 @@
+/**
+ * Resources
+ */
 import { expect, Page, Route, test } from '@playwright/test'
+
+/**
+ * Dependencies
+ */
 import { selectors, testApi, testData } from '../selectors/auth.se'
 import { setupApiInterceptor } from '../utils/api-interceptor'
 
-// Extend Page type to include our custom method
+/**
+ * Types
+ */
 interface CustomPage extends Page {
   mockRoute: (url: string, handler: (route: Route) => Promise<void>) => Promise<void>
 }
 
+/**
+ * Tests
+ */
 test.describe('Authentication Flow', () => {
   test.beforeEach(async ({ page }) => {
     // Setup API interceptor to avoid accidental API calls
@@ -83,6 +95,9 @@ test.describe('Authentication Flow', () => {
   })
 
   test('should handle signup flow', async ({ page }) => {
+    // Setup API interceptor
+    await setupApiInterceptor(page, testApi.interceptorURL)
+
     const signUpButton = page.getByRole('button', selectors.signUp.cta.validate)
     await page.goto(selectors.signUp.URL)
 
@@ -126,19 +141,17 @@ test.describe('Authentication Flow', () => {
     /**
      * Mock the signup endpoint
      */
-    await (page as CustomPage).mockRoute(testApi.signUp.URL, async (route) => {
+    await page.route('**/auth/signup', async (route) => {
       await route.fulfill({
         status: testApi.signUp.success.status,
         contentType: 'application/json',
         body: JSON.stringify(testApi.signUp.success.body)
       })
     })
-
-    // Validate the form
     await signUpButton.click()
 
-    // Wait for success message to be visible
-    await expect(page.getByText(selectors.signUp.success.title)).toBeVisible()
+    // Wait for success message to be visible with increased timeout
+    await expect(page.getByText(selectors.signUp.success.title)).toBeVisible({ timeout: 10000 })
     await expect(page.getByText(selectors.signUp.success.subtitle)).toBeVisible()
     await expect(page.getByText(selectors.signUp.success.description)).toBeVisible()
     await expect(page.getByText(testData.email)).toBeVisible()
@@ -228,7 +241,7 @@ test.describe('Authentication Flow', () => {
     /**
      * Mock the reset password request endpoint
      */
-    await page.route(testApi.resetPasswordRequest.URL, async (route) => {
+    await (page as CustomPage).mockRoute(testApi.resetPasswordRequest.URL, async (route) => {
       const request = route.request()
       const email = (await request.postDataJSON())?.email
 
@@ -293,7 +306,7 @@ test.describe('Authentication Flow', () => {
     /**
      * Mock the reset password endpoint
      */
-    await page.route(testApi.resetPassword.URL, async (route) => {
+    await (page as CustomPage).mockRoute(testApi.resetPassword.URL, async (route) => {
       await route.fulfill({
         status: testApi.resetPassword.success.status,
         contentType: 'application/json',

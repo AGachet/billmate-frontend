@@ -14,9 +14,9 @@ const testData = {
 }
 
 const testApi = {
-  interceptorURL: '/api/auth/**',
+  interceptorURL: '**/auth/**',
   signIn: {
-    URL: '/api/auth/signin',
+    URL: '**/auth/signin',
     success: {
       status: 200,
       body: { userId: '123e4567-e89b-12d3-a456-426614174000' }
@@ -27,21 +27,21 @@ const testApi = {
     }
   },
   signUp: {
-    URL: '/api/auth/signup',
+    URL: '**/auth/signup',
     success: {
       status: 200,
       body: { message: 'User registration successful. Please check your email for confirmation.' }
     }
   },
   signOut: {
-    URL: '/api/auth/signout',
+    URL: '**/auth/signout',
     success: {
       status: 200,
       body: { message: 'User signed out successfully' }
     }
   },
   me: {
-    URL: '/api/auth/me',
+    URL: '**/auth/me',
     success: {
       status: 200,
       body: {
@@ -57,7 +57,7 @@ const testApi = {
     }
   },
   resetPasswordRequest: {
-    URL: '/api/auth/request-password-reset',
+    URL: '**/auth/request-password-reset',
     success: {
       status: 200,
       body: { message: 'Reset password link sent successfully', resetToken: 'test-reset-token' }
@@ -68,7 +68,7 @@ const testApi = {
     }
   },
   resetPassword: {
-    URL: '/api/auth/reset-password',
+    URL: '**/auth/reset-password',
     success: {
       status: 200,
       body: { message: 'Password reset successful' }
