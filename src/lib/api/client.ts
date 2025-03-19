@@ -11,7 +11,8 @@ const apiClient = {
    * Generic method for making HTTP requests
    */
   async request<T>(endpoint: string, method: string = 'GET', data?: unknown, customHeaders: Record<string, string> = {}): Promise<T> {
-    const url = `${import.meta.env.VITE_API_URL}${endpoint}`
+    const baseApiUrl = '/api'
+    const url = `${baseApiUrl}${endpoint}`
 
     // Default headers
     const headers: HeadersInit = {

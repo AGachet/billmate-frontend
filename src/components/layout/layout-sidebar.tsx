@@ -239,7 +239,7 @@ export const LayoutSidebar = ({ ...props }: ComponentProps<typeof Sidebar>) => {
         ))}
       </SidebarContent>
       <SidebarFooter>
-        <NavUser user={data.user} />
+        <NavUser />
       </SidebarFooter>
       <SidebarRail />
     </Sidebar>

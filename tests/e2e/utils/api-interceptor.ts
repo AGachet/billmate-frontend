@@ -9,8 +9,8 @@ export interface CustomPage extends Page {
  * Setup API request interceptor to catch unmocked API calls
  */
 export const setupApiInterceptor = async (page: Page, interceptorURL: string) => {
-  // Keep track of mocked routes
-  const mockedRoutes = new Set<string>()
+  // Keep track of mocked routes with patterns
+  const mockedRoutes = new Set<RegExp>()
 
   // Intercept all API calls that are not explicitly mocked
   await page.route(interceptorURL, async (route) => {
@@ -24,34 +24,43 @@ export const setupApiInterceptor = async (page: Page, interceptorURL: string) =>
       return
     }
 
-    // If this route is mocked, let it pass through
-    if (mockedRoutes.has(url)) {
+    // Check if any mocked pattern matches this URL
+    const isMocked = Array.from(mockedRoutes).some((pattern) => {
+      const matches = pattern.test(url)
+      return matches
+    })
+    if (isMocked) {
       await route.continue()
       return
     }
 
-    // else, reject the request with a clear error message
-    const method = request.method()
-    const postData = request.postData()
-
-    console.error(`
-      Unauthorized API call detected!
-      URL: ${url}
-      Method: ${method}
-      Data: ${postData}
-      Stack trace: ${new Error().stack}
-    `)
-
-    // Reject the request with a clear error message
+    // Log and abort unauthorized requests
+    console.error(`Unauthorized API call: ${request.method()} ${url}`)
     await route.abort('failed')
   })
 
-  // Helper function to mock routes and track them
-  const mockRoute = async (url: string, handler: (route: Route) => Promise<void>) => {
-    mockedRoutes.add(url)
-    await page.route(url, handler)
+  // Helper function to mock routes with pattern matching
+  const mockRoute = async (urlPattern: string, handler: (route: Route) => Promise<void>) => {
+    // For wildcard patterns like **/auth/signup, convert to proper regex
+    let patternStr = urlPattern
+
+    // Replace ** with .* to match any characters
+    if (urlPattern.includes('**')) {
+      patternStr = urlPattern.replace(/\*\*/g, '.*')
+    } else {
+      // For regular patterns, escape special characters
+      patternStr = urlPattern.replace(/[-[\]{}()*+?.,\\^$|#\s]/g, '\\$&')
+    }
+
+    const pattern = new RegExp(patternStr)
+
+    mockedRoutes.add(pattern)
+    await page.route(pattern, handler)
   }
 
   // Store the helper function on the page object for use in tests
   ;(page as CustomPage).mockRoute = mockRoute
+
+  // Wait a bit to ensure the interceptor is ready
+  await page.waitForTimeout(100)
 }

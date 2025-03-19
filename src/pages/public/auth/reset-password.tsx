@@ -158,8 +158,7 @@ export function ResetPassword() {
                 name: 'password',
                 label: tAuth('fields.tk_newPassword_'),
                 type: 'password',
-                autoComplete: 'new-password',
-                description: tAuth('fields.tk_passwordDescription_')
+                autoComplete: 'new-password'
               })}
 
               {renderFormField({
