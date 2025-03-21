@@ -1,15 +1,15 @@
 /**
+ * Dependencies
+ */
+import { useSignOut } from '@/hooks/api/auth/mutations/useSignOut'
+import { useMe } from '@/hooks/api/auth/queries/useMe'
+
+/**
  * Components
  */
 import { Avatar, AvatarFallback } from '@/components/ui/shadcn/avatar'
 import { DropdownMenu, DropdownMenuContent, DropdownMenuGroup, DropdownMenuItem, DropdownMenuLabel, DropdownMenuSeparator, DropdownMenuTrigger } from '@/components/ui/shadcn/dropdown-menu'
 import { SidebarMenu, SidebarMenuButton, SidebarMenuItem, useSidebar } from '@/components/ui/shadcn/sidebar'
-
-/**
- * Dependencies
- */
-import { useSignOut } from '@/hooks/api/auth/mutations/useSignOut'
-import { useMe } from '@/hooks/api/auth/queries/useMe'
 
 /**
  * Icons

@@ -4,14 +4,10 @@
 import { Navigate, RouteObject } from 'react-router-dom'
 
 /**
- * Pages
+ * Dependencies
  */
-import { ResetPassword, ResetPasswordRequest, SignIn, SignUp } from '@/pages/public/auth'
-import { NotFound } from '@/pages/public/errors/not-found'
-
-/**
- * Components
- */
+import { NotFound, ResetPassword, ResetPasswordRequest, SignIn, SignUp } from '@/router/lazy-pages'
+import { LazyRouteElement } from '@/router/lazy-route-element'
 import { PublicOnlyRoute } from '@/router/routes-guard'
 
 /**
@@ -21,7 +17,7 @@ export const publicRoutes: RouteObject[] = [
   {
     path: '/',
     element: <PublicOnlyRoute />,
-    errorElement: <NotFound />,
+    errorElement: LazyRouteElement(NotFound),
     children: [
       {
         path: '/',
@@ -29,19 +25,19 @@ export const publicRoutes: RouteObject[] = [
       },
       {
         path: 'signin',
-        element: <SignIn />
+        element: LazyRouteElement(SignIn)
       },
       {
         path: 'signup',
-        element: <SignUp />
+        element: LazyRouteElement(SignUp)
       },
       {
         path: 'reset-password-request',
-        element: <ResetPasswordRequest />
+        element: LazyRouteElement(ResetPasswordRequest)
       },
       {
         path: 'reset-password',
-        element: <ResetPassword />
+        element: LazyRouteElement(ResetPassword)
       }
       // Add other public routes here
     ]

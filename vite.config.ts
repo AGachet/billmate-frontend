@@ -26,6 +26,39 @@ export default defineConfig(({ mode }) => {
           secure: false
         }
       }
+    },
+    build: {
+      chunkSizeWarningLimit: 800,
+      cssCodeSplit: true,
+      sourcemap: false,
+      minify: 'terser',
+      terserOptions: {
+        compress: {
+          drop_console: true
+        }
+      },
+      rollupOptions: {
+        output: {
+          manualChunks: (id) => {
+            // External libraries
+            if (id.includes('node_modules')) {
+              if (/react|react-dom|react-router-dom/.test(id)) return 'react-vendor'
+              if (/@radix-ui\/react-/.test(id)) return 'ui-components'
+              if (/@hookform\/resolvers|react-hook-form|zod|@tanstack\/react-query/.test(id)) return 'form-utils'
+              if (/i18next/.test(id)) return 'i18n'
+              if (/lucide-react/.test(id)) return 'icons'
+              if (/class-variance-authority|clsx|tailwind-merge/.test(id)) return 'utils'
+            }
+
+            // Local Shadcn components - grouped with Radix UI
+            if (id.includes('/src/components/ui/shadcn/')) {
+              return 'ui-components'
+            }
+
+            return null
+          }
+        }
+      }
     }
   }
 })

@@ -4,14 +4,10 @@
 import { RouteObject } from 'react-router-dom'
 
 /**
- * Pages
+ * Dependencies
  */
-import { Dashboard } from '@/pages/private/dashboard'
-
-/**
- * Components
- */
-import { LayoutLogged } from '@/components/layout/layout-logged'
+import { Dashboard, LayoutLogged } from '@/router/lazy-pages'
+import { LazyRouteElement } from '@/router/lazy-route-element'
 import { PrivateOnlyRoute } from '@/router/routes-guard'
 
 /**
@@ -23,11 +19,11 @@ export const privateRoutes: RouteObject[] = [
     element: <PrivateOnlyRoute />,
     children: [
       {
-        element: <LayoutLogged />,
+        element: LazyRouteElement(LayoutLogged),
         children: [
           {
             path: 'dashboard',
-            element: <Dashboard />
+            element: LazyRouteElement(Dashboard)
           }
           // Add other protected routes here
         ]
