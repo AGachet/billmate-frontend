@@ -14,7 +14,7 @@ yet effective solution for managing clients, quotes, invoices, and expenses.
 ## 📦 Tech Stack
 
 - **Front-end [current]:** React, TypeScript, Vite, TailwindCSS, ShadCN
-- **Back-end [Soon]:** NestJS, TypeScript, PlanetScale (MySQL)
+- **Back-end [Soon]:** NestJS, TypeScript, Supabase (Psql)
 - **Others:** ESLint, Prettier, i18next, (cypress, vitest, ...)
 
 ---
