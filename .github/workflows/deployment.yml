@@ -19,6 +19,12 @@ jobs:
     name: Check if tests passed
     runs-on: ubuntu-latest
     steps:
+      - uses: actions/checkout@v4
+        with:
+          repository: ${{ github.repository }}
+          ref: ${{ github.ref }}
+          fetch-depth: 0
+
       - name: Install GitHub CLI
         run: sudo apt-get install gh -y
 
