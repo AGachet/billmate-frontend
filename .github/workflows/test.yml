@@ -1,4 +1,4 @@
-name: CI
+name: Tests
 
 on:
   pull_request:
@@ -64,7 +64,6 @@ jobs:
           reviewdog_version: latest
 
       - name: Run Prettier with Reviewdog
-        if: github.event_name == 'pull_request'
         env:
           REVIEWDOG_GITHUB_API_TOKEN: ${{ secrets.GITHUB_TOKEN }}
         run: |
@@ -74,7 +73,6 @@ jobs:
             -filter-mode=added
 
       - name: Run ESLint with Reviewdog
-        if: github.event_name == 'pull_request'
         uses: reviewdog/action-eslint@v1
         with:
           github_token: ${{ secrets.GITHUB_TOKEN }}
@@ -86,7 +84,6 @@ jobs:
           tool_name: ESLint
 
       - name: Run Type Check with Reviewdog
-        if: github.event_name == 'pull_request'
         env:
           REVIEWDOG_GITHUB_API_TOKEN: ${{ secrets.GITHUB_TOKEN }}
         run: |
