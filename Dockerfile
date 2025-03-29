@@ -37,7 +37,7 @@ LABEL org.opencontainers.image.description="BillMate Frontend App"
 LABEL org.opencontainers.image.licenses="MIT"
 
 # Create app user for security
-RUN adduser -S reactjs -u 1001 -G nginx
+RUN adduser -S ci-deploy -u 1031 -G nginx
 
 # Copy built application from builder stage
 COPY --from=builder /app/dist .
@@ -47,11 +47,11 @@ COPY nginx.conf /etc/nginx/conf.d/default.conf
 ENV NODE_ENV=production
 
 # Change ownership of nginx directories
-RUN chown -R reactjs:nginx /usr/share/nginx/html && \
-    chown -R reactjs:nginx /var/cache/nginx && \
-    chown -R reactjs:nginx /var/log/nginx && \
+RUN chown -R ci-deploy:nginx /usr/share/nginx/html && \
+    chown -R ci-deploy:nginx /var/cache/nginx && \
+    chown -R ci-deploy:nginx /var/log/nginx && \
     touch /var/run/nginx.pid && \
-    chown reactjs:nginx /var/run/nginx.pid
+    chown ci-deploy:nginx /var/run/nginx.pid
 
 # Expose port
 EXPOSE 80
@@ -61,7 +61,7 @@ HEALTHCHECK --interval=30s --timeout=3s --start-period=30s \
   CMD wget --quiet --tries=1 --spider http://localhost:80/ || exit 1
 
 # Use non-root user for better security
-USER reactjs
+USER ci-deploy
 
 # Start Nginx
 CMD ["nginx", "-g", "daemon off;"]

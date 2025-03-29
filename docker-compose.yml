@@ -14,6 +14,7 @@ services:
       - '${FRONTEND_PORT:-80}:80'
     volumes:
       - ./nginx.conf:/etc/nginx/conf.d/default.conf
+      - ./nginx/logs:/var/log/nginx
     restart: unless-stopped
     healthcheck:
       test: ['CMD', 'wget', '--quiet', '--tries=1', '--spider', 'http://localhost:80/']
@@ -26,4 +27,4 @@ services:
 
 networks:
   billmate-network:
-    external: true # Assuming your backend creates this network
+    external: true # Assuming backend creates this network
