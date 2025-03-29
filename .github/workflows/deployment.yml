@@ -56,7 +56,7 @@ jobs:
 
   docker-push:
     name: Push Docker image to GHCR
-    needs: [check-tests]
+    needs: check-tests
     runs-on: ubuntu-latest
     permissions:
       contents: read
@@ -99,3 +99,117 @@ jobs:
           labels: ${{ steps.meta.outputs.labels }}
           cache-from: type=gha
           cache-to: type=gha,mode=max
+
+  deploy-to-nas:
+    name: Deploy to NAS
+    needs: [docker-push]
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v4
+
+      - name: Setup SSH key
+        run: |
+          mkdir -p ~/.ssh
+          echo "${{ secrets.CI_DEPLOY_NAS_KEY }}" > ~/.ssh/id_rsa
+          chmod 600 ~/.ssh/id_rsa
+          echo -e "Host cinas-ext\n  HostName ${{ secrets.NAS_HOST }}\n  Port ${{ secrets.NAS_PORT }}\n  User ${{ secrets.NAS_USER }}\n  IdentityFile ~/.ssh/id_rsa\n  StrictHostKeyChecking no" >> ~/.ssh/config
+
+      - name: Setup NAS directories
+        run: |
+          # Create base directory with proper permissions
+          ssh cinas-ext "mkdir -p ${{ secrets.NAS_FRONTEND_PATH }} && chmod 755 ${{ secrets.NAS_FRONTEND_PATH }}"
+
+          # Create nginx configuration directory
+          ssh cinas-ext "mkdir -p ${{ secrets.NAS_FRONTEND_PATH }}/nginx && chmod 755 ${{ secrets.NAS_FRONTEND_PATH }}/nginx"
+
+      - name: Check Docker version on NAS
+        run: |
+          DOCKER_VERSION=$(ssh cinas-ext '/usr/local/bin/docker --version')
+          echo "Docker version on NAS: $DOCKER_VERSION"
+          if ! ssh cinas-ext '/usr/local/bin/docker info >/dev/null 2>&1'; then
+            echo "Docker daemon is not running on NAS"
+            exit 1
+          fi
+
+      - name: Deploy frontend container
+        run: |
+          # Function to check SSH command status
+          check_ssh_status() {
+            if [ $? -ne 0 ]; then
+              echo "Error executing SSH command: $1"
+              echo "Last command failed: $2"
+              exit 1
+            fi
+          }
+
+          # Create network if it doesn't exist
+          echo "Creating network if it doesn't exist..."
+          ssh cinas-ext "/usr/local/bin/docker network inspect billmate-network >/dev/null 2>&1 || /usr/local/bin/docker network create billmate-network"
+          check_ssh_status "Network creation" "docker network inspect/create"
+
+          # Backup current docker-compose.yml if it exists
+          echo "Backing up docker-compose.yml..."
+          ssh cinas-ext "if [ -f ${{ secrets.NAS_FRONTEND_PATH }}/docker-compose.yml ]; then cp ${{ secrets.NAS_FRONTEND_PATH }}/docker-compose.yml ${{ secrets.NAS_FRONTEND_PATH }}/docker-compose.yml.backup; fi"
+          check_ssh_status "Backup creation" "cp docker-compose.yml"
+
+          # Copy docker-compose.yml
+          echo "Copying docker-compose.yml to NAS..."
+          cat docker-compose.yml | ssh cinas-ext "cat > ${{ secrets.NAS_FRONTEND_PATH }}/docker-compose.yml"
+          check_ssh_status "File copy" "cat docker-compose.yml"
+
+          # Update image in docker-compose.yml
+          echo "Updating image in docker-compose.yml..."
+          REPO=$(echo "${{ github.repository }}" | tr '[:upper:]' '[:lower:]')
+          ssh cinas-ext "sed -i 's|image: .*|image: ghcr.io/$REPO:latest|' ${{ secrets.NAS_FRONTEND_PATH }}/docker-compose.yml"
+          check_ssh_status "Image update" "sed image"
+
+          # Copy nginx configuration
+          echo "Copying nginx configuration..."
+          cat nginx.conf | ssh cinas-ext "cat > ${{ secrets.NAS_FRONTEND_PATH }}/nginx/default.conf"
+          check_ssh_status "Nginx config copy" "cat nginx.conf"
+
+          # Create .env file from secrets
+          echo "Creating .env file..."
+          ssh cinas-ext "cat <<EOF > ${{ secrets.NAS_FRONTEND_PATH }}/.env
+          VITE_BASE_API_URL=\"${{ secrets.FRONTEND_API_URL }}\"
+          FRONTEND_PORT=\"80\"
+          EOF"
+          check_ssh_status "Env file creation" "cat > .env"
+
+          # Set proper permissions for .env file
+          echo "Setting .env file permissions..."
+          ssh cinas-ext "chmod 600 ${{ secrets.NAS_FRONTEND_PATH }}/.env"
+          check_ssh_status "Permission setting" "chmod .env"
+
+          # Check if deployment is possible
+          echo "Checking if deployment is possible..."
+          if ssh cinas-ext "cd ${{ secrets.NAS_FRONTEND_PATH }} && /usr/local/bin/docker-compose ps | grep -q 'frontend'"; then
+            echo "Frontend is already running. Proceeding with deployment..."
+          else
+            echo "No frontend is currently running. Proceeding with fresh deployment..."
+          fi
+
+          # Clean up old images and containers
+          echo "Cleaning up old containers..."
+          ssh cinas-ext "cd ${{ secrets.NAS_FRONTEND_PATH }} && /usr/local/bin/docker-compose down"
+          check_ssh_status "Container cleanup" "docker-compose down"
+
+          # Pull and deploy the container
+          echo "Pulling and deploying new container..."
+          ssh cinas-ext "cd ${{ secrets.NAS_FRONTEND_PATH }} && /usr/local/bin/docker-compose pull && /usr/local/bin/docker-compose up -d"
+          check_ssh_status "Container deployment" "docker-compose up"
+
+          # Wait for container to be healthy
+          echo "Waiting for container to be healthy..."
+          for i in {1..30}; do
+            if ssh cinas-ext "cd ${{ secrets.NAS_FRONTEND_PATH }} && /usr/local/bin/docker-compose ps | grep -q 'frontend.*Up'"; then
+              echo "Container is healthy!"
+              break
+            fi
+            if [ $i -eq 30 ]; then
+              echo "Container failed to become healthy within 30 seconds"
+              ssh cinas-ext "cd ${{ secrets.NAS_FRONTEND_PATH }} && /usr/local/bin/docker-compose logs frontend"
+              exit 1
+            fi
+            sleep 1
+          done
