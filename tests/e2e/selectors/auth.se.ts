@@ -61,9 +61,9 @@ const testApi = {
     success: {
       status: 200,
       body: {
-        roles: ['GUEST'],
-        modules: ['USER_ACCOUNT_CREATION', 'USER_ACCOUNT_LOGIN'],
-        permissions: ['USER_ACCOUNT_CREATE_OWN', 'USER_ACCOUNT_LOGIN']
+        roles: ['guest'],
+        modules: ['USER_ACCOUNT_CREATION', 'USER_ACCOUNT_PASSWORD_RECOVERY'],
+        permissions: ['USER_ACCOUNT_CREATE_OWN']
       }
     }
   },

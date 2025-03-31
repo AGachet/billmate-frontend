@@ -10,6 +10,8 @@ import { Link, useNavigate } from 'react-router-dom'
 /**
  * Dependencies
  */
+import { useIsSessionActive } from '@/hooks/auth/session'
+import { useModuleAccess } from '@/hooks/auth/useModuleAccess'
 import { extractTokenFromUrl } from '@/utils/tokenExtractor'
 
 /**
@@ -31,7 +33,6 @@ import { AlertCircle } from 'lucide-react'
  * API
  */
 import { useSignIn, useSignInSchema, type SignInPayloadDto } from '@/hooks/api/auth'
-import { useIsSessionActive } from '@/hooks/auth/session'
 
 /**
  * React declaration
@@ -46,6 +47,7 @@ export function SignIn() {
   // React Query mutation
   const signInMutation = useSignIn()
   const { isSessionActive } = useIsSessionActive()
+  const { hasModuleAccess } = useModuleAccess()
 
   // Create form with schema
   const schemas = useSignInSchema()
@@ -103,9 +105,11 @@ export function SignIn() {
           {name === 'password' ? (
             <div className="flex items-center justify-between">
               <FormLabel>{label}</FormLabel>
-              <Link to="/reset-password-request" className="text-sm font-medium text-blue-600 hover:text-blue-500">
-                {tAuth('callToAction.tk_forgotPassword_')}
-              </Link>
+              {hasModuleAccess('USER_ACCOUNT_PASSWORD_RECOVERY') && (
+                <Link to="/reset-password-request" className="text-sm font-medium text-blue-600 hover:text-blue-500">
+                  {tAuth('callToAction.tk_forgotPassword_')}
+                </Link>
+              )}
             </div>
           ) : (
             <FormLabel>{label}</FormLabel>
@@ -158,20 +162,24 @@ export function SignIn() {
               {signInMutation.isLoading ? tCommon('loading.tk_loadingSignin_') : tAuth('callToAction.tk_signin_')}
             </Button>
 
-            <div className="flex items-center justify-center">
-              <Separator className="w-1/3" />
-              <span className="mx-4 text-sm text-gray-500">{tCommon('other.tk_or_')}</span>
-              <Separator className="w-1/3" />
-            </div>
+            {hasModuleAccess('USER_ACCOUNT_CREATION') && (
+              <>
+                <div className="flex items-center justify-center">
+                  <Separator className="w-1/3" />
+                  <span className="mx-4 text-sm text-gray-500">{tCommon('other.tk_or_')}</span>
+                  <Separator className="w-1/3" />
+                </div>
 
-            <div className="text-center">
-              <p className="text-sm text-gray-600">
-                {tAuth('signin.tk_noAccount_')}{' '}
-                <Link to="/signup" className="font-medium text-blue-600 hover:text-blue-500">
-                  {tAuth('callToAction.tk_signup_')}
-                </Link>
-              </p>
-            </div>
+                <div className="text-center">
+                  <p className="text-sm text-gray-600">
+                    {tAuth('signin.tk_noAccount_')}{' '}
+                    <Link to="/signup" className="font-medium text-blue-600 hover:text-blue-500">
+                      {tAuth('callToAction.tk_signup_')}
+                    </Link>
+                  </p>
+                </div>
+              </>
+            )}
           </form>
         </Form>
       </Card>
