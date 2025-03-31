@@ -23,6 +23,18 @@ test.describe('Authentication Flow', () => {
   test.beforeEach(async ({ page }) => {
     // Setup API interceptor to avoid accidental API calls
     await setupApiInterceptor(page, testApi.interceptorURL)
+
+    /**
+     * Mock the guest endpoint by default
+     */
+    await (page as CustomPage).mockRoute(testApi.guest.URL, async (route) => {
+      await route.fulfill({
+        status: testApi.guest.success.status,
+        contentType: 'application/json',
+        body: JSON.stringify(testApi.guest.success.body)
+      })
+    })
+
     await page.goto('/')
   })
 
@@ -95,8 +107,16 @@ test.describe('Authentication Flow', () => {
   })
 
   test('should handle signup flow', async ({ page }) => {
-    // Setup API interceptor
-    await setupApiInterceptor(page, testApi.interceptorURL)
+    /**
+     * Mock the guest endpoint
+     */
+    await (page as CustomPage).mockRoute(testApi.guest.URL, async (route) => {
+      await route.fulfill({
+        status: testApi.guest.success.status,
+        contentType: 'application/json',
+        body: JSON.stringify(testApi.guest.success.body)
+      })
+    })
 
     const signUpButton = page.getByRole('button', selectors.signUp.cta.validate)
     await page.goto(selectors.signUp.URL)
@@ -367,5 +387,81 @@ test.describe('Authentication Flow', () => {
     await expect(page.getByText(selectors.resetPassword.success.subtitle)).toBeVisible()
     await expect(page.getByText(selectors.resetPassword.success.description)).toBeVisible()
     await expect(page.getByRole('link', selectors.resetPassword.cta.backToSignIn)).toBeVisible()
+  })
+
+  test('should initialize guest access when not logged in', async ({ page }) => {
+    // Clear any existing auth data
+    await page.evaluate(() => {
+      localStorage.removeItem('authMe')
+      localStorage.removeItem('guestAccess')
+    })
+
+    /**
+     * Mock the guest endpoint
+     */
+    await (page as CustomPage).mockRoute(testApi.guest.URL, async (route) => {
+      await route.fulfill({
+        status: testApi.guest.success.status,
+        contentType: 'application/json',
+        body: JSON.stringify(testApi.guest.success.body)
+      })
+    })
+
+    // Navigate to signin page and wait for the guest access to be initialized
+    await page.goto(selectors.signIn.URL)
+
+    // Wait for the guest access to be initialized
+    await page.waitForFunction(
+      () => {
+        const guestAccess = localStorage.getItem('guestAccess')
+        return guestAccess !== null
+      },
+      { timeout: 5000 }
+    )
+
+    // Verify guest access is initialized
+    const guestAccess = await page.evaluate(() => {
+      return localStorage.getItem('guestAccess')
+    })
+    expect(guestAccess).toBeTruthy()
+    expect(JSON.parse(guestAccess!)).toEqual(testApi.guest.success.body)
+  })
+
+  test('should not initialize guest access when logged in', async ({ page }) => {
+    /**
+     * Mock the user endpoint
+     */
+    await (page as CustomPage).mockRoute(testApi.me.URL, async (route) => {
+      await route.fulfill({
+        status: testApi.me.success.status,
+        contentType: 'application/json',
+        body: JSON.stringify(testApi.me.success.body)
+      })
+    })
+
+    /**
+     * Mock the guest endpoint to not be called
+     */
+    await (page as CustomPage).mockRoute(testApi.guest.URL, async (route) => {
+      await route.abort()
+    })
+
+    // Simulate a logged in user
+    await page.evaluate((userData) => {
+      localStorage.setItem('authMe', JSON.stringify(userData))
+      localStorage.removeItem('guestAccess')
+    }, testApi.me.success.body)
+
+    // Navigate to signin page and wait for any potential guest access initialization
+    await page.goto(selectors.signIn.URL)
+
+    // Wait a bit to ensure any async operations are complete
+    await page.waitForTimeout(1000)
+
+    // Verify guest access is not initialized
+    const guestAccess = await page.evaluate(() => {
+      return localStorage.getItem('guestAccess')
+    })
+    expect(guestAccess).toBeNull()
   })
 })

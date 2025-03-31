@@ -8,7 +8,7 @@ import { z } from 'zod'
 /**
  * Dependencies
  */
-import { useMe } from '@/hooks/api/auth/queries/useMe'
+import { useMe } from '@/hooks/api/auth'
 import apiClient from '@/lib/api/client'
 
 // Translation
@@ -54,9 +54,11 @@ export const useSignIn = () => {
       return schemas.response.parse(response)
     },
     onSuccess: async () => {
+      // Remove guest access
+      localStorage.removeItem('guestAccess')
+
       // Fetch user profile
-      const authMe = await me.refetch()
-      localStorage.setItem('authMe', JSON.stringify(authMe.data))
+      await me.refetch()
     },
     onError: (error) => {
       console.error(tAuth('errors.tk_signinError_'), error)
