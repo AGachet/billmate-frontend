@@ -9,6 +9,7 @@ import { z } from 'zod'
 /**
  * Dependencies
  */
+import { useGuest } from '@/hooks/api/auth'
 import apiClient from '@/lib/api/client'
 
 // Translation
@@ -42,6 +43,7 @@ export type SignOutResponseDto = z.infer<ReturnType<typeof useSignOutSchema>['re
 export const useSignOut = () => {
   const queryClient = useQueryClient()
   const navigate = useNavigate()
+  const guest = useGuest()
   const schemas = useSignOutSchema()
 
   // Get user data from cache
@@ -60,7 +62,10 @@ export const useSignOut = () => {
       const response = await apiClient.post<SignOutResponseDto>('/auth/signout', payload)
       return schemas.response.parse(response)
     },
-    onSuccess: () => {
+    onSuccess: async () => {
+      // Fetch guest access
+      await guest.refetch()
+
       // Invalidate and reset auth status
       queryClient.setQueryData(['authMe'], null)
       localStorage.removeItem('authMe')

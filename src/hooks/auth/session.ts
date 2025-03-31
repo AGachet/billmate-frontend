@@ -6,7 +6,7 @@ import { useQueryClient } from '@tanstack/react-query'
 /**
  * Schemas & DTOs
  */
-import type { MeResponseDto } from '@/hooks/api/auth/queries/useMe'
+import type { MeResponseDto } from '@/hooks/api/auth'
 
 /**
  * Hook declaration

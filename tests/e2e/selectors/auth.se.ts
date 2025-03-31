@@ -56,6 +56,17 @@ const testApi = {
       }
     }
   },
+  guest: {
+    URL: '**/auth/guest',
+    success: {
+      status: 200,
+      body: {
+        roles: ['GUEST'],
+        modules: ['USER_ACCOUNT_CREATION', 'USER_ACCOUNT_LOGIN'],
+        permissions: ['USER_ACCOUNT_CREATE_OWN', 'USER_ACCOUNT_LOGIN']
+      }
+    }
+  },
   resetPasswordRequest: {
     URL: '**/auth/request-password-reset',
     success: {

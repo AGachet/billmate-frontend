@@ -41,6 +41,7 @@ export const useMe = () => {
     queryFn: async () => {
       try {
         const response = await apiClient.get<MeResponseDto>('/auth/me')
+        localStorage.setItem('authMe', JSON.stringify(response))
         return schemas.response.parse(response)
       } catch (error) {
         console.error(tAuth('errors.tk_fetchMeError_'), error)
