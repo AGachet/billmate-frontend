@@ -41,6 +41,15 @@ test.describe('Authentication Flow', () => {
   test('should display all required elements on signin page', async ({ page }) => {
     await page.goto(selectors.signIn.URL)
 
+    // Wait for guest access to be loaded
+    await page.waitForFunction(
+      () => {
+        const guestAccess = localStorage.getItem('guestAccess')
+        return guestAccess !== null
+      },
+      { timeout: 5000 }
+    )
+
     // Verify that texts don't contain translation keys
     const elements = await page.$$('text=/.tk_/')
     expect(elements.length).toBe(0)
@@ -282,6 +291,15 @@ test.describe('Authentication Flow', () => {
 
     await page.goto(selectors.resetPasswordRequest.URL)
 
+    // Wait for guest access to be loaded
+    await page.waitForFunction(
+      () => {
+        const guestAccess = localStorage.getItem('guestAccess')
+        return guestAccess !== null
+      },
+      { timeout: 5000 }
+    )
+
     // Verify that texts don't contain translation keys
     const elements = await page.$$('text=/.tk_/')
     expect(elements.length).toBe(0)
@@ -336,6 +354,15 @@ test.describe('Authentication Flow', () => {
 
     // Test without token
     await page.goto(selectors.resetPassword.URL)
+
+    // Wait for guest access to be loaded
+    await page.waitForFunction(
+      () => {
+        const guestAccess = localStorage.getItem('guestAccess')
+        return guestAccess !== null
+      },
+      { timeout: 5000 }
+    )
 
     // Verify that texts don't contain translation keys
     const elements = await page.$$('text=/.tk_/')

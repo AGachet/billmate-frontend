@@ -1,27 +1,21 @@
 /**
- * Resources
- */
-import { useQueryClient } from '@tanstack/react-query'
-
-/**
  * Dependencies
  */
-import type { GuestResponseDto, MeResponseDto } from '@/hooks/api/auth'
+import { useGuest, useMe } from '@/hooks/api/auth'
 
 /**
  * Hook declaration
  */
 export const useModuleAccess = () => {
-  const queryClient = useQueryClient()
-  const me = queryClient.getQueryData<MeResponseDto>(['authMe'])
-  const guestAccess = queryClient.getQueryData<GuestResponseDto>(['guestAccess'])
+  const { data: me } = useMe()
+  const { data: guest } = useGuest()
 
   const hasModuleAccess = (module: string): boolean => {
-    return !!me?.modules?.includes(module) || !!guestAccess?.modules?.includes(module)
+    return !!me?.modules?.includes(module) || !!guest?.modules?.includes(module)
   }
 
   const hasPermission = (permission: string): boolean => {
-    return !!me?.permissions?.includes(permission) || !!guestAccess?.permissions?.includes(permission)
+    return !!me?.permissions?.includes(permission) || !!guest?.permissions?.includes(permission)
   }
 
   return {

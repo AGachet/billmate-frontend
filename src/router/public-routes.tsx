@@ -8,7 +8,7 @@ import { Navigate, RouteObject } from 'react-router-dom'
  */
 import { NotFound, ResetPassword, ResetPasswordRequest, SignIn, SignUp } from '@/router/lazy-pages'
 import { LazyRouteElement } from '@/router/lazy-route-element'
-import { PublicOnlyRoute } from '@/router/routes-guard'
+import { ModuleAccessRoute, PublicOnlyRoute } from '@/router/routes-guard'
 
 /**
  * Routes
@@ -33,11 +33,23 @@ export const publicRoutes: RouteObject[] = [
       },
       {
         path: 'reset-password-request',
-        element: LazyRouteElement(ResetPasswordRequest)
+        element: <ModuleAccessRoute module="USER_ACCOUNT_PASSWORD_RECOVERY" />,
+        children: [
+          {
+            index: true,
+            element: LazyRouteElement(ResetPasswordRequest)
+          }
+        ]
       },
       {
         path: 'reset-password',
-        element: LazyRouteElement(ResetPassword)
+        element: <ModuleAccessRoute module="USER_ACCOUNT_PASSWORD_RECOVERY" />,
+        children: [
+          {
+            index: true,
+            element: LazyRouteElement(ResetPassword)
+          }
+        ]
       }
       // Add other public routes here
     ]
