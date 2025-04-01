@@ -260,43 +260,28 @@ jobs:
           ssh cinas-ext "cd ${{ secrets.NAS_FRONTEND_PATH }} && /usr/local/bin/docker-compose up -d"
           check_ssh_status "Container startup" "docker-compose up -d"
 
-          # Clean up unused containers
-          echo "Cleaning up unused containers..."
-          ssh cinas-ext "/usr/local/bin/docker container prune -f"
-          check_ssh_status "Container cleanup" "docker container prune"
-
-          # Explain the cleanup strategy
-          echo "Cleanup strategy: We keep only the current version (${VERSION}) and remove all other tagged and dangling images related to ${REPO}"
-
-          # Remove tagged images with different versions
-          echo "Removing old tagged images..."
+          # Clean up containers and unused images
+          echo "Cleaning up unused containers and images..."
           ssh cinas-ext "cd ${{ secrets.NAS_FRONTEND_PATH }} && \
-            OLD_IMAGES=\$(/usr/local/bin/docker images \"ghcr.io/${REPO}\" --format '{{.Repository}}:{{.Tag}}' | grep -v \"${VERSION}\") && \
-            if [ ! -z \"\$OLD_IMAGES\" ]; then \
-              echo \"Removing old tagged images: \$OLD_IMAGES\" && \
-              echo \"\$OLD_IMAGES\" | xargs -r /usr/local/bin/docker rmi; \
-            else \
-              echo \"No old tagged images to remove\"; \
-            fi"
-          check_ssh_status "Old tagged image removal" "docker rmi old tagged images"
-
-          # Find and clean dangling images only related to our repository
-          echo "Removing dangling images from our repository..."
-          ssh cinas-ext "cd ${{ secrets.NAS_FRONTEND_PATH }} && \
-            # Identify all dangling images
-            DANGLING_IDS=\$(/usr/local/bin/docker images --filter \"dangling=true\" --format '{{.ID}}') && \
-            if [ ! -z \"\$DANGLING_IDS\" ]; then \
-              # For each dangling image, check if it's ours by inspecting it
-              for IMG_ID in \$DANGLING_IDS; do \
-                if /usr/local/bin/docker inspect \$IMG_ID | grep -q \"ghcr.io/${REPO}\"; then \
-                  echo \"Removing dangling image \$IMG_ID from our repository\" && \
-                  /usr/local/bin/docker rmi \$IMG_ID; \
+            echo 'Pruning unused containers...' && \
+            /usr/local/bin/docker container prune -f && \
+            echo 'Cleaning up images from repository ${REPO} except the current version ${VERSION}...' && \
+            CURRENT_IMAGE_ID=\$(/usr/local/bin/docker images ghcr.io/${REPO}:${VERSION} -q) && \
+            if [ ! -z \"\$CURRENT_IMAGE_ID\" ]; then \
+              echo \"Keeping current image ID: \$CURRENT_IMAGE_ID\" && \
+              ALL_REPO_IMAGES=\$(/usr/local/bin/docker images ghcr.io/${REPO} -q) && \
+              for IMG_ID in \$ALL_REPO_IMAGES; do \
+                if [ \"\$IMG_ID\" != \"\$CURRENT_IMAGE_ID\" ]; then \
+                  echo \"Removing old image: \$IMG_ID\" && \
+                  /usr/local/bin/docker rmi -f \$IMG_ID || true; \
                 fi; \
-              done; \
+              done && \
+              echo 'Pruning any remaining dangling images...' && \
+              /usr/local/bin/docker image prune -f; \
             else \
-              echo \"No dangling images found\"; \
+              echo \"Warning: Current image ID not found. Skipping cleanup.\"; \
             fi"
-          check_ssh_status "Dangling image removal" "docker rmi dangling images"
+          check_ssh_status "Image cleanup" "docker image cleanup"
 
           # Wait for container to be healthy
           echo "Waiting for container to be healthy..."
