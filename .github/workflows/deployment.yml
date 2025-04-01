@@ -119,6 +119,13 @@ jobs:
     steps:
       - uses: actions/checkout@v4
 
+      - name: Get package version
+        id: package-version
+        run: |
+          VERSION=$(node -p "require('./package.json').version")
+          echo "Version from package.json: $VERSION"
+          echo "version=$VERSION" >> $GITHUB_OUTPUT
+
       - name: Setup SSH key
         run: |
           mkdir -p ~/.ssh
@@ -165,6 +172,16 @@ jobs:
           REPO="$(echo '${{ github.repository }}' | tr '[:upper:]' '[:lower:]')"
           VERSION="${{ steps.package-version.outputs.version }}"
           echo "Using repository: ${REPO}, version: ${VERSION}"
+
+          # Verify version is not empty
+          if [ -z "$VERSION" ]; then
+            echo "ERROR: Version is empty! Using default version 0.0.0"
+            VERSION="0.0.0"
+          fi
+
+          # Debug package.json content
+          echo "Package.json content:"
+          cat package.json | grep version
 
           # Update local docker-compose.yml before sending it
           echo "Updating local docker-compose.yml..."
