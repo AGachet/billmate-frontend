@@ -179,7 +179,7 @@ jobs:
           # Update image in docker-compose.yml
           echo "Updating image in docker-compose.yml..."
           REPO=\"$(echo '${{ github.repository }}' | tr '[:upper:]' '[:lower:]')\"
-          ssh cinas-ext "sed -i 's|image: .*|image: ghcr.io/\${REPO}:latest|' ${{ secrets.NAS_FRONTEND_PATH }}/docker-compose.yml"
+          ssh cinas-ext "sed -i 's|image: .*|image: ghcr.io/\${REPO}:\${VERSION}|\' ${{ secrets.NAS_FRONTEND_PATH }}/docker-compose.yml"
           check_ssh_status "Image update" "sed image"
 
           # Copy nginx configuration
@@ -208,47 +208,30 @@ jobs:
             echo "No frontend is currently running. Proceeding with fresh deployment..."
           fi
 
-          # Stop the current container and remove it
-          echo "Stopping and removing current container..."
+          # Stop the current container, deploy new one, and clean up
+          echo "Stopping current container, deploying new one, and cleaning up..."
           ssh cinas-ext "cd ${{ secrets.NAS_FRONTEND_PATH }} && \
             REPO=\"$(echo '${{ github.repository }}' | tr '[:upper:]' '[:lower:]')\" && \
-            # Get the ID of the currently running container
-            CURRENT_CONTAINER_ID=\$(/usr/local/bin/docker-compose ps -q frontend) && \
-            if [ ! -z \"\$CURRENT_CONTAINER_ID\" ]; then
-              # Get the image ID from the current container
-              CURRENT_IMAGE_ID=\$(/usr/local/bin/docker inspect --format='{{.Image}}' \$CURRENT_CONTAINER_ID) && \
-              # Get the version tag of the current image (excluding 'latest' tag)
-              # This ensures we keep track of the specific version even after 'latest' is moved to the new image
-              VERSION_TAG=\$(/usr/local/bin/docker inspect \$CURRENT_IMAGE_ID --format='{{range .RepoTags}}{{.}}{{end}}' | grep -v 'latest' | head -n 1) && \
-              if [ ! -z \"\$VERSION_TAG\" ]; then
-                echo \"Saving current image with tag: \$VERSION_TAG\" && \
-                # Update docker-compose.yml to use version tag instead of 'latest'
-                # This prevents the '<none>' tag issue in Synology's interface
-                sed -i \"s|image: .*|image: \$VERSION_TAG|\" docker-compose.yml && \
+            VERSION=\"${{ github.event.inputs.version || steps.package-version.outputs.version }}\" && \
+            # Stop any existing frontend container
+            /usr/local/bin/docker-compose down && \
+            # Update docker-compose.yml to use specific version instead of latest
+            sed -i \"s|image: .*|image: ghcr.io/\${REPO}:\${VERSION}|\" docker-compose.yml && \
+            # Pull and start the new container
+            /usr/local/bin/docker-compose up -d && \
+            # Clean up unused containers of the same type
+            /usr/local/bin/docker container prune -f && \
 
-                # Create a rollback tag for the current version
-                ROLLBACK_TAG=\"ghcr.io/\${REPO}:rollback-\$(echo \$VERSION_TAG | awk -F ':' '{print \$2}')\" && \
-                /usr/local/bin/docker tag \$CURRENT_IMAGE_ID \$ROLLBACK_TAG && \
-                echo \"Rollback tag created: \$ROLLBACK_TAG\" && \
+            # Clean up old images while preserving the latest one
+            /usr/local/bin/docker images \"ghcr.io/\${REPO}\" --format '{{.Repository}}:{{.Tag}}' | \
+            grep -v \"\${VERSION}\" | \
+            xargs -r /usr/local/bin/docker rmi && \
 
-                # Stop the current container after tags are properly set
-                /usr/local/bin/docker-compose down
-
-                # Clean up old images while preserving:
-                # 1. The 'latest' tag (will be our new version)
-                # 2. The current version tag (previous stable version)
-                # 3. The rollback tag of the current version
-                echo \"Cleaning up old images...\" && \
-                /usr/local/bin/docker images \"ghcr.io/\${REPO}\" --format '{{.Tag}}' | \
-                grep -v 'latest' | \
-                grep -v \"\$(echo \$VERSION_TAG | awk -F ':' '{print \$2}')\" | \
-                grep -v \"rollback-\$(echo \$VERSION_TAG | awk -F ':' '{print \$2}')\" | \
-                xargs -r -I {} /usr/local/bin/docker rmi \"ghcr.io/\${REPO}:{}\"
-              fi
-            fi && \
-            # Deploy the new version using the 'latest' tag
-            sed -i \"s|image: .*|image: ghcr.io/\${REPO}:latest|\" docker-compose.yml && \
-            /usr/local/bin/docker-compose up -d"
+            # Clean up dangling images specific to this repository
+            /usr/local/bin/docker images --filter "dangling=true" --format '{{.ID}} {{.Repository}}' | \
+            grep \"ghcr.io/\${REPO}\" | \
+            awk '{print $1}' | \
+            xargs -r /usr/local/bin/docker rmi"
           check_ssh_status "Container deployment" "docker-compose up"
 
           # Wait for container to be healthy
