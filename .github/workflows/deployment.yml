@@ -195,8 +195,8 @@ jobs:
           # Create .env file from secrets
           echo "Creating .env file..."
           ssh cinas-ext "cat <<EOF > ${{ secrets.NAS_FRONTEND_PATH }}/.env
-          VITE_BASE_API_URL=\"${{ secrets.FRONTEND_API_URL }}\"
-          FRONTEND_PORT=\"3000\"
+          VITE_BASE_API_URL=${{ secrets.FRONTEND_API_URL }}
+          FRONTEND_PORT=3000
           EOF"
           check_ssh_status "Env file creation" "cat > .env"
 
