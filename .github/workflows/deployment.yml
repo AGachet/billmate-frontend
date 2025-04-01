@@ -178,8 +178,8 @@ jobs:
 
           # Update image in docker-compose.yml
           echo "Updating image in docker-compose.yml..."
-          REPO=$(echo "${{ github.repository }}" | tr '[:upper:]' '[:lower:]')
-          ssh cinas-ext "sed -i 's|image: .*|image: ghcr.io/$REPO:latest|' ${{ secrets.NAS_FRONTEND_PATH }}/docker-compose.yml"
+          REPO=\"$(echo '${{ github.repository }}' | tr '[:upper:]' '[:lower:]')\"
+          ssh cinas-ext "sed -i 's|image: .*|image: ghcr.io/\${REPO}:latest|' ${{ secrets.NAS_FRONTEND_PATH }}/docker-compose.yml"
           check_ssh_status "Image update" "sed image"
 
           # Copy nginx configuration
@@ -211,7 +211,7 @@ jobs:
           # Stop the current container and remove it
           echo "Stopping and removing current container..."
           ssh cinas-ext "cd ${{ secrets.NAS_FRONTEND_PATH }} && \
-            REPO='ghcr.io/${{ github.repository }}' && \
+            REPO=\"$(echo '${{ github.repository }}' | tr '[:upper:]' '[:lower:]')\" && \
             # Get the ID of the currently running container
             CURRENT_CONTAINER_ID=\$(/usr/local/bin/docker-compose ps -q frontend) && \
             if [ ! -z \"\$CURRENT_CONTAINER_ID\" ]; then
@@ -227,8 +227,7 @@ jobs:
                 sed -i \"s|image: .*|image: \$VERSION_TAG|\" docker-compose.yml && \
 
                 # Create a rollback tag for the current version
-                # This gives us an extra safety net for rollbacks if needed
-                ROLLBACK_TAG=\"ghcr.io/\$REPO:rollback-\$(echo \$VERSION_TAG | awk -F ':' '{print \$2}')\" && \
+                ROLLBACK_TAG=\"ghcr.io/\${REPO}:rollback-\$(echo \$VERSION_TAG | awk -F ':' '{print \$2}')\" && \
                 /usr/local/bin/docker tag \$CURRENT_IMAGE_ID \$ROLLBACK_TAG && \
                 echo \"Rollback tag created: \$ROLLBACK_TAG\" && \
 
@@ -240,15 +239,15 @@ jobs:
                 # 2. The current version tag (previous stable version)
                 # 3. The rollback tag of the current version
                 echo \"Cleaning up old images...\" && \
-                /usr/local/bin/docker images \$REPO --format '{{.Tag}}' | \
+                /usr/local/bin/docker images \"ghcr.io/\${REPO}\" --format '{{.Tag}}' | \
                 grep -v 'latest' | \
                 grep -v \"\$(echo \$VERSION_TAG | awk -F ':' '{print \$2}')\" | \
                 grep -v \"rollback-\$(echo \$VERSION_TAG | awk -F ':' '{print \$2}')\" | \
-                xargs -r -I {} /usr/local/bin/docker rmi \"\$REPO:{}\"
+                xargs -r -I {} /usr/local/bin/docker rmi \"ghcr.io/\${REPO}:{}\"
               fi
             fi && \
             # Deploy the new version using the 'latest' tag
-            sed -i 's|image: .*|image: ghcr.io/\$REPO:latest|' docker-compose.yml && \
+            sed -i \"s|image: .*|image: ghcr.io/\${REPO}:latest|\" docker-compose.yml && \
             /usr/local/bin/docker-compose up -d"
           check_ssh_status "Container deployment" "docker-compose up"
 
