@@ -201,17 +201,16 @@ jobs:
           ssh cinas-ext "cd ${{ secrets.NAS_FRONTEND_PATH }} && /usr/local/bin/docker-compose down"
           check_ssh_status "Container cleanup" "docker-compose down"
 
-          # Clean up images but keep only the current running image and one previous version
+          # Clean up images but keep only the last version
           echo "Managing Docker images..."
           ssh cinas-ext "REPO='ghcr.io/${{ github.repository }}' && \
-            # Get the currently used image ID (if any)
-            CURRENT_IMAGE=\$(/usr/local/bin/docker-compose config | grep 'image:' | awk '{print \$2}') && \
-            # Get the ID of the last successful image
-            PREVIOUS_IMAGE=\$(/usr/local/bin/docker images \$REPO --format '{{.ID}}' | head -n 1) && \
-            # Remove all other images for this repository
+            # Get the last successful image before pulling new one
+            LAST_IMAGE=\$(/usr/local/bin/docker images \$REPO --format '{{.ID}}' | head -n 1) && \
+            echo \"Keeping last successful image: \$LAST_IMAGE\" && \
+            # Remove all other images except the last successful one
             /usr/local/bin/docker images \$REPO --format '{{.ID}}' | \
             while read -r id; do \
-              if [ \"\$id\" != \"\$CURRENT_IMAGE\" ] && [ \"\$id\" != \"\$PREVIOUS_IMAGE\" ]; then \
+              if [ \"\$id\" != \"\$LAST_IMAGE\" ]; then \
                 echo \"Removing image \$id\" && \
                 /usr/local/bin/docker rmi \$id || true; \
               fi \
