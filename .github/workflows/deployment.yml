@@ -86,7 +86,7 @@ jobs:
         with:
           images: ghcr.io/${{ github.repository }}
           tags: |
-            type=raw,value=${{ github.event.inputs.version || steps.package-version.outputs.version }}
+            type=raw,value=${{ steps.package-version.outputs.version }}
             type=raw,value=latest
             type=sha,format=short
 
@@ -171,7 +171,8 @@ jobs:
           # Set version variables once at the beginning
           REPO="$(echo '${{ github.repository }}' | tr '[:upper:]' '[:lower:]')"
           VERSION="${{ steps.package-version.outputs.version }}"
-          echo "Using repository: ${REPO}, version: ${VERSION}"
+          SHA_SHORT=$(echo "${{ github.sha }}" | cut -c1-7)
+          echo "Using repository: ${REPO}, version: ${VERSION}, SHA: ${SHA_SHORT}"
 
           # Verify version is not empty
           if [ -z "$VERSION" ]; then
@@ -183,8 +184,9 @@ jobs:
           echo "Package.json content:"
           cat package.json | grep version
 
-          # Update local docker-compose.yml before sending it
+          # Update local docker-compose.yml to use both version and short SHA for uniqueness
           echo "Updating local docker-compose.yml..."
+          # Use version tag for usual tracking, but docker will always fetch the latest image with this tag
           sed -i.bak "s|image:.*|image: ghcr.io/${REPO}:${VERSION}|" docker-compose.yml
           echo "Updated docker-compose.yml content:"
           cat docker-compose.yml
@@ -248,6 +250,11 @@ jobs:
           ssh cinas-ext "cd ${{ secrets.NAS_FRONTEND_PATH }} && cat docker-compose.yml && /usr/local/bin/docker-compose config"
           check_ssh_status "Docker compose validation" "docker-compose config"
 
+          # Before starting container, ensure we have the latest image version
+          echo "Ensuring we have the latest image version..."
+          ssh cinas-ext "cd ${{ secrets.NAS_FRONTEND_PATH }} && /usr/local/bin/docker pull ghcr.io/${REPO}:${VERSION}"
+          check_ssh_status "Image pull" "docker pull"
+
           # Start the new container
           echo "Starting new container..."
           ssh cinas-ext "cd ${{ secrets.NAS_FRONTEND_PATH }} && /usr/local/bin/docker-compose up -d"
@@ -258,21 +265,37 @@ jobs:
           ssh cinas-ext "/usr/local/bin/docker container prune -f"
           check_ssh_status "Container cleanup" "docker container prune"
 
-          # Remove old images
-          echo "Removing old images..."
-          ssh cinas-ext "cd ${{ secrets.NAS_FRONTEND_PATH }} && \
-            /usr/local/bin/docker images \"ghcr.io/${REPO}\" --format '{{.Repository}}:{{.Tag}}' | \
-            grep -v \"${VERSION}\" | \
-            xargs -r /usr/local/bin/docker rmi"
-          check_ssh_status "Old image removal" "docker rmi old images"
+          # Explain the cleanup strategy
+          echo "Cleanup strategy: We keep only the current version (${VERSION}) and remove all other tagged and dangling images related to ${REPO}"
 
-          # Remove dangling images
-          echo "Removing dangling images..."
+          # Remove tagged images with different versions
+          echo "Removing old tagged images..."
           ssh cinas-ext "cd ${{ secrets.NAS_FRONTEND_PATH }} && \
-            /usr/local/bin/docker images --filter \"dangling=true\" --format '{{.ID}} {{.Repository}}' | \
-            grep \"ghcr.io/${REPO}\" | \
-            awk '{print \$1}' | \
-            xargs -r /usr/local/bin/docker rmi"
+            OLD_IMAGES=\$(/usr/local/bin/docker images \"ghcr.io/${REPO}\" --format '{{.Repository}}:{{.Tag}}' | grep -v \"${VERSION}\") && \
+            if [ ! -z \"\$OLD_IMAGES\" ]; then \
+              echo \"Removing old tagged images: \$OLD_IMAGES\" && \
+              echo \"\$OLD_IMAGES\" | xargs -r /usr/local/bin/docker rmi; \
+            else \
+              echo \"No old tagged images to remove\"; \
+            fi"
+          check_ssh_status "Old tagged image removal" "docker rmi old tagged images"
+
+          # Find and clean dangling images only related to our repository
+          echo "Removing dangling images from our repository..."
+          ssh cinas-ext "cd ${{ secrets.NAS_FRONTEND_PATH }} && \
+            # Identify all dangling images
+            DANGLING_IDS=\$(/usr/local/bin/docker images --filter \"dangling=true\" --format '{{.ID}}') && \
+            if [ ! -z \"\$DANGLING_IDS\" ]; then \
+              # For each dangling image, check if it's ours by inspecting it
+              for IMG_ID in \$DANGLING_IDS; do \
+                if /usr/local/bin/docker inspect \$IMG_ID | grep -q \"ghcr.io/${REPO}\"; then \
+                  echo \"Removing dangling image \$IMG_ID from our repository\" && \
+                  /usr/local/bin/docker rmi \$IMG_ID; \
+                fi; \
+              done; \
+            else \
+              echo \"No dangling images found\"; \
+            fi"
           check_ssh_status "Dangling image removal" "docker rmi dangling images"
 
           # Wait for container to be healthy
