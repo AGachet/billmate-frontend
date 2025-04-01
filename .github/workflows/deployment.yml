@@ -206,6 +206,11 @@ jobs:
           ssh cinas-ext "cd ${{ secrets.NAS_FRONTEND_PATH }} && /usr/local/bin/docker-compose down"
           check_ssh_status "Container cleanup" "docker-compose down"
 
+          # Clean up old images
+          echo "Cleaning up old images..."
+          ssh cinas-ext "/usr/local/bin/docker image prune -f --filter 'label=org.opencontainers.image.source=https://github.com/${{ github.repository }}'"
+          check_ssh_status "Image cleanup" "docker image prune"
+
           # Pull and deploy the container
           echo "Pulling and deploying new container..."
           ssh cinas-ext "cd ${{ secrets.NAS_FRONTEND_PATH }} && /usr/local/bin/docker-compose pull && /usr/local/bin/docker-compose up -d"
