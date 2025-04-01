@@ -219,7 +219,7 @@ jobs:
               CURRENT_IMAGE_ID=\$(/usr/local/bin/docker inspect --format='{{.Image}}' \$CURRENT_CONTAINER_ID) && \
               # Get the version tag of the current image (excluding 'latest' tag)
               # This ensures we keep track of the specific version even after 'latest' is moved to the new image
-              VERSION_TAG=\$(/usr/local/bin/docker inspect \$CURRENT_IMAGE_ID --format='{{range .RepoTags}}{{if not (contains . \"latest\")}}{{.}}{{end}}{{end}}') && \
+              VERSION_TAG=\$(/usr/local/bin/docker inspect \$CURRENT_IMAGE_ID --format='{{range .RepoTags}}{{.}}{{end}}' | grep -v 'latest' | head -n 1) && \
               if [ ! -z \"\$VERSION_TAG\" ]; then
                 echo \"Saving current image with tag: \$VERSION_TAG\" && \
                 # Update docker-compose.yml to use version tag instead of 'latest'
