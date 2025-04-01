@@ -201,15 +201,27 @@ jobs:
             echo "No frontend is currently running. Proceeding with fresh deployment..."
           fi
 
-          # Clean up old images and containers
-          echo "Cleaning up old containers..."
+          # Stop the current container and remove it
+          echo "Stopping and removing current container..."
           ssh cinas-ext "cd ${{ secrets.NAS_FRONTEND_PATH }} && /usr/local/bin/docker-compose down"
           check_ssh_status "Container cleanup" "docker-compose down"
 
-          # Clean up old images
-          echo "Cleaning up old images..."
-          ssh cinas-ext "/usr/local/bin/docker image prune -f --filter 'label=org.opencontainers.image.source=https://github.com/${{ github.repository }}'"
-          check_ssh_status "Image cleanup" "docker image prune"
+          # Clean up images but keep only the current running image and one previous version
+          echo "Managing Docker images..."
+          ssh cinas-ext "REPO='ghcr.io/${{ github.repository }}' && \
+            # Get the currently used image ID (if any)
+            CURRENT_IMAGE=\$(/usr/local/bin/docker-compose config | grep 'image:' | awk '{print \$2}') && \
+            # Get the ID of the last successful image
+            PREVIOUS_IMAGE=\$(/usr/local/bin/docker images \$REPO --format '{{.ID}}' | head -n 1) && \
+            # Remove all other images for this repository
+            /usr/local/bin/docker images \$REPO --format '{{.ID}}' | \
+            while read -r id; do \
+              if [ \"\$id\" != \"\$CURRENT_IMAGE\" ] && [ \"\$id\" != \"\$PREVIOUS_IMAGE\" ]; then \
+                echo \"Removing image \$id\" && \
+                /usr/local/bin/docker rmi \$id || true; \
+              fi \
+            done"
+          check_ssh_status "Image cleanup" "docker image management"
 
           # Pull and deploy the container
           echo "Pulling and deploying new container..."
