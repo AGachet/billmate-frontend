@@ -213,24 +213,16 @@ jobs:
           ssh cinas-ext "cd ${{ secrets.NAS_FRONTEND_PATH }} && \
             REPO=\"$(echo '${{ github.repository }}' | tr '[:upper:]' '[:lower:]')\" && \
             VERSION=\"${{ github.event.inputs.version || steps.package-version.outputs.version }}\" && \
-            # Stop any existing frontend container
             /usr/local/bin/docker-compose down && \
-            # Update docker-compose.yml to use specific version instead of latest
             sed -i \"s|image: .*|image: ghcr.io/\${REPO}:\${VERSION}|\" docker-compose.yml && \
-            # Pull and start the new container
             /usr/local/bin/docker-compose up -d && \
-            # Clean up unused containers of the same type
             /usr/local/bin/docker container prune -f && \
-
-            # Clean up old images while preserving the latest one
             /usr/local/bin/docker images \"ghcr.io/\${REPO}\" --format '{{.Repository}}:{{.Tag}}' | \
             grep -v \"\${VERSION}\" | \
             xargs -r /usr/local/bin/docker rmi && \
-
-            # Clean up dangling images specific to this repository
-            /usr/local/bin/docker images --filter "dangling=true" --format '{{.ID}} {{.Repository}}' | \
+            /usr/local/bin/docker images --filter \"dangling=true\" --format '{{.ID}} {{.Repository}}' | \
             grep \"ghcr.io/\${REPO}\" | \
-            awk '{print $1}' | \
+            awk '{print \$1}' | \
             xargs -r /usr/local/bin/docker rmi"
           check_ssh_status "Container deployment" "docker-compose up"
 
