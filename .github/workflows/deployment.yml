@@ -188,11 +188,6 @@ jobs:
           EOF"
           check_ssh_status "Env file creation" "cat > .env"
 
-          # Set proper permissions for .env file
-          echo "Setting .env file permissions..."
-          ssh cinas-ext "chmod 600 ${{ secrets.NAS_FRONTEND_PATH }}/.env"
-          check_ssh_status "Permission setting" "chmod .env"
-
           # Check if deployment is possible
           echo "Checking if deployment is possible..."
           if ssh cinas-ext "cd ${{ secrets.NAS_FRONTEND_PATH }} && /usr/local/bin/docker-compose ps | grep -q 'frontend'"; then
