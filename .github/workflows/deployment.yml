@@ -208,23 +208,55 @@ jobs:
             echo "No frontend is currently running. Proceeding with fresh deployment..."
           fi
 
-          # Stop the current container, deploy new one, and clean up
-          echo "Stopping current container, deploying new one, and cleaning up..."
+          # Set up environment variables
+          echo "Setting up environment variables..."
+          ssh cinas-ext "cd ${{ secrets.NAS_FRONTEND_PATH }} && \
+            REPO=\"$(echo '${{ github.repository }}' | tr '[:upper:]' '[:lower:]')\" && \
+            VERSION=\"${{ github.event.inputs.version || steps.package-version.outputs.version }}\""
+          check_ssh_status "Environment setup" "Setting environment variables"
+
+          # Stop the current container
+          echo "Stopping current container..."
+          ssh cinas-ext "cd ${{ secrets.NAS_FRONTEND_PATH }} && /usr/local/bin/docker-compose down"
+          check_ssh_status "Container shutdown" "docker-compose down"
+
+          # Update image reference in docker-compose.yml
+          echo "Updating image reference in docker-compose.yml..."
           ssh cinas-ext "cd ${{ secrets.NAS_FRONTEND_PATH }} && \
             REPO=\"$(echo '${{ github.repository }}' | tr '[:upper:]' '[:lower:]')\" && \
             VERSION=\"${{ github.event.inputs.version || steps.package-version.outputs.version }}\" && \
-            /usr/local/bin/docker-compose down && \
-            sed -i \"s|image: .*|image: ghcr.io/\${REPO}:\${VERSION}|\" docker-compose.yml && \
-            /usr/local/bin/docker-compose up -d && \
-            /usr/local/bin/docker container prune -f && \
+            sed -i \"s|image: .*|image: ghcr.io/\${REPO}:\${VERSION}|\" docker-compose.yml"
+          check_ssh_status "Image update" "sed docker-compose.yml"
+
+          # Start the new container
+          echo "Starting new container..."
+          ssh cinas-ext "cd ${{ secrets.NAS_FRONTEND_PATH }} && /usr/local/bin/docker-compose up -d"
+          check_ssh_status "Container startup" "docker-compose up -d"
+
+          # Clean up unused containers
+          echo "Cleaning up unused containers..."
+          ssh cinas-ext "/usr/local/bin/docker container prune -f"
+          check_ssh_status "Container cleanup" "docker container prune"
+
+          # Remove old images
+          echo "Removing old images..."
+          ssh cinas-ext "cd ${{ secrets.NAS_FRONTEND_PATH }} && \
+            REPO=\"$(echo '${{ github.repository }}' | tr '[:upper:]' '[:lower:]')\" && \
+            VERSION=\"${{ github.event.inputs.version || steps.package-version.outputs.version }}\" && \
             /usr/local/bin/docker images \"ghcr.io/\${REPO}\" --format '{{.Repository}}:{{.Tag}}' | \
             grep -v \"\${VERSION}\" | \
-            xargs -r /usr/local/bin/docker rmi && \
+            xargs -r /usr/local/bin/docker rmi"
+          check_ssh_status "Old image removal" "docker rmi old images"
+
+          # Remove dangling images
+          echo "Removing dangling images..."
+          ssh cinas-ext "cd ${{ secrets.NAS_FRONTEND_PATH }} && \
+            REPO=\"$(echo '${{ github.repository }}' | tr '[:upper:]' '[:lower:]')\" && \
             /usr/local/bin/docker images --filter \"dangling=true\" --format '{{.ID}} {{.Repository}}' | \
             grep \"ghcr.io/\${REPO}\" | \
             awk '{print \$1}' | \
             xargs -r /usr/local/bin/docker rmi"
-          check_ssh_status "Container deployment" "docker-compose up"
+          check_ssh_status "Dangling image removal" "docker rmi dangling images"
 
           # Wait for container to be healthy
           echo "Waiting for container to be healthy..."
