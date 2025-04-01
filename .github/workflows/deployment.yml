@@ -161,6 +161,17 @@ jobs:
             fi
           }
 
+          # Set version variables once at the beginning
+          REPO="$(echo '${{ github.repository }}' | tr '[:upper:]' '[:lower:]')"
+          VERSION="${{ steps.package-version.outputs.version }}"
+          echo "Using repository: ${REPO}, version: ${VERSION}"
+
+          # Update local docker-compose.yml before sending it
+          echo "Updating local docker-compose.yml..."
+          sed -i.bak "s|image:.*|image: ghcr.io/${REPO}:${VERSION}|" docker-compose.yml
+          echo "Updated docker-compose.yml content:"
+          cat docker-compose.yml
+
           # Create network if it doesn't exist
           echo "Creating network if it doesn't exist..."
           ssh cinas-ext "/usr/local/bin/docker network inspect billmate-network >/dev/null 2>&1 || /usr/local/bin/docker network create billmate-network"
@@ -176,11 +187,10 @@ jobs:
           cat docker-compose.yml | ssh cinas-ext "cat > ${{ secrets.NAS_FRONTEND_PATH }}/docker-compose.yml"
           check_ssh_status "File copy" "cat docker-compose.yml"
 
-          # Update image in docker-compose.yml
-          echo "Updating image in docker-compose.yml..."
-          REPO=\"$(echo '${{ github.repository }}' | tr '[:upper:]' '[:lower:]')\"
-          ssh cinas-ext "sed -i 's|image: .*|image: ghcr.io/${REPO}:${VERSION}|' ${{ secrets.NAS_FRONTEND_PATH }}/docker-compose.yml"
-          check_ssh_status "Image update" "sed image"
+          # Verify docker-compose.yml content on NAS
+          echo "Verifying docker-compose.yml content on NAS..."
+          ssh cinas-ext "cat ${{ secrets.NAS_FRONTEND_PATH }}/docker-compose.yml"
+          check_ssh_status "File verification" "cat docker-compose.yml"
 
           # Copy nginx configuration
           echo "Copying nginx configuration..."
@@ -194,11 +204,9 @@ jobs:
 
           # Create .env file from secrets
           echo "Creating .env file..."
-          ssh cinas-ext "cat <<EOF > ${{ secrets.NAS_FRONTEND_PATH }}/.env
-          VITE_BASE_API_URL=${{ secrets.FRONTEND_API_URL }}
-          FRONTEND_PORT=3000
-          EOF"
-          check_ssh_status "Env file creation" "cat > .env"
+          ssh cinas-ext "echo 'VITE_BASE_API_URL=${{ secrets.FRONTEND_API_URL }}' > ${{ secrets.NAS_FRONTEND_PATH }}/.env && \
+          echo 'FRONTEND_PORT=3000' >> ${{ secrets.NAS_FRONTEND_PATH }}/.env"
+          check_ssh_status "Env file creation" "echo > .env"
 
           # Check if deployment is possible
           echo "Checking if deployment is possible..."
@@ -209,10 +217,8 @@ jobs:
           fi
 
           # Set up environment variables
-          echo "Setting up environment variables..."
-          ssh cinas-ext "cd ${{ secrets.NAS_FRONTEND_PATH }} && \
-            REPO=\"$(echo '${{ github.repository }}' | tr '[:upper:]' '[:lower:]')\" && \
-            VERSION=\"${{ github.event.inputs.version || steps.package-version.outputs.version }}\""
+          echo "Setting up environment variables on NAS..."
+          ssh cinas-ext "cd ${{ secrets.NAS_FRONTEND_PATH }} && export REPO=\"${REPO}\" && export VERSION=\"${VERSION}\""
           check_ssh_status "Environment setup" "Setting environment variables"
 
           # Stop the current container
@@ -220,13 +226,10 @@ jobs:
           ssh cinas-ext "cd ${{ secrets.NAS_FRONTEND_PATH }} && /usr/local/bin/docker-compose down"
           check_ssh_status "Container shutdown" "docker-compose down"
 
-          # Update image reference in docker-compose.yml
-          echo "Updating image reference in docker-compose.yml..."
-          ssh cinas-ext "cd ${{ secrets.NAS_FRONTEND_PATH }} && \
-            REPO=\"$(echo '${{ github.repository }}' | tr '[:upper:]' '[:lower:]')\" && \
-            VERSION=\"${{ github.event.inputs.version || steps.package-version.outputs.version }}\" && \
-            sed -i \"s|image: .*|image: ghcr.io/\${REPO}:\${VERSION}|\" docker-compose.yml"
-          check_ssh_status "Image update" "sed docker-compose.yml"
+          # Check docker-compose.yml for validity
+          echo "Checking docker-compose.yml for validity..."
+          ssh cinas-ext "cd ${{ secrets.NAS_FRONTEND_PATH }} && cat docker-compose.yml && /usr/local/bin/docker-compose config"
+          check_ssh_status "Docker compose validation" "docker-compose config"
 
           # Start the new container
           echo "Starting new container..."
@@ -241,19 +244,16 @@ jobs:
           # Remove old images
           echo "Removing old images..."
           ssh cinas-ext "cd ${{ secrets.NAS_FRONTEND_PATH }} && \
-            REPO=\"$(echo '${{ github.repository }}' | tr '[:upper:]' '[:lower:]')\" && \
-            VERSION=\"${{ github.event.inputs.version || steps.package-version.outputs.version }}\" && \
-            /usr/local/bin/docker images \"ghcr.io/\${REPO}\" --format '{{.Repository}}:{{.Tag}}' | \
-            grep -v \"\${VERSION}\" | \
+            /usr/local/bin/docker images \"ghcr.io/${REPO}\" --format '{{.Repository}}:{{.Tag}}' | \
+            grep -v \"${VERSION}\" | \
             xargs -r /usr/local/bin/docker rmi"
           check_ssh_status "Old image removal" "docker rmi old images"
 
           # Remove dangling images
           echo "Removing dangling images..."
           ssh cinas-ext "cd ${{ secrets.NAS_FRONTEND_PATH }} && \
-            REPO=\"$(echo '${{ github.repository }}' | tr '[:upper:]' '[:lower:]')\" && \
             /usr/local/bin/docker images --filter \"dangling=true\" --format '{{.ID}} {{.Repository}}' | \
-            grep \"ghcr.io/\${REPO}\" | \
+            grep \"ghcr.io/${REPO}\" | \
             awk '{print \$1}' | \
             xargs -r /usr/local/bin/docker rmi"
           check_ssh_status "Dangling image removal" "docker rmi dangling images"
