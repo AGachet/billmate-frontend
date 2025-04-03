@@ -54,9 +54,88 @@ jobs:
             gh run view $LAST_FAILED_RUN --log
           fi
 
+  create-version-tag:
+    name: Create version tag based on package.json
+    needs: check-tests
+    runs-on: ubuntu-latest
+    permissions:
+      contents: write
+    outputs:
+      version: ${{ steps.package-version.outputs.version }}
+    steps:
+      - uses: actions/checkout@v4
+        with:
+          fetch-depth: 0
+          token: ${{ secrets.GITHUB_TOKEN }}
+
+      - name: Get package version
+        id: package-version
+        run: |
+          VERSION=$(node -p "require('./package.json').version")
+          echo "Version from package.json: $VERSION"
+          echo "version=$VERSION" >> $GITHUB_OUTPUT
+
+      - name: Check for version bump in commit message
+        id: check-is-version-bump
+        run: |
+          if [ "${{ github.event_name }}" = "push" ]; then
+            # Get last commit message
+            COMMIT_MSG=$(git log -1 --pretty=%B)
+            echo "Last commit message: $COMMIT_MSG"
+
+            # Check for version bump commit
+            if [[ "$COMMIT_MSG" =~ chore:\ bump\ version\ to ]]; then
+              echo "✅ Version bump commit detected: $COMMIT_MSG"
+              echo "is_version_bump=true" >> $GITHUB_OUTPUT
+            else
+              echo "No version bump detected in commit message"
+              echo "is_version_bump=false" >> $GITHUB_OUTPUT
+            fi
+          else
+            # For workflow_dispatch and repository_dispatch
+            echo "Not a push event, skipping tag creation"
+            echo "is_version_bump=false" >> $GITHUB_OUTPUT
+          fi
+
+      - name: Check if version tag exists
+        id: check-tag
+        if: steps.check-is-version-bump.outputs.is_version_bump == 'true'
+        run: |
+          TAG_EXISTS=$(git tag -l "v${{ steps.package-version.outputs.version }}")
+          if [ -z "$TAG_EXISTS" ]; then
+            echo "tag_exists=false" >> $GITHUB_OUTPUT
+            echo "Tag v${{ steps.package-version.outputs.version }} does not exist, will create it"
+          else
+            echo "tag_exists=true" >> $GITHUB_OUTPUT
+            echo "Tag v${{ steps.package-version.outputs.version }} already exists"
+          fi
+
+      - name: Set Git user
+        if: steps.check-is-version-bump.outputs.is_version_bump == 'true'
+        run: |
+          git config --global user.email "actions@github.com"
+          git config --global user.name "GitHub Actions"
+
+      - name: Create tag if it doesn't exist
+        if: steps.check-is-version-bump.outputs.is_version_bump == 'true' && steps.check-tag.outputs.tag_exists == 'false'
+        run: |
+          git tag -a "v${{ steps.package-version.outputs.version }}" -m "Release version ${{ steps.package-version.outputs.version }}"
+          echo "Created tag v${{ steps.package-version.outputs.version }}"
+
+      - name: Push current master to tag
+        if: steps.check-is-version-bump.outputs.is_version_bump == 'true'
+        run: |
+          if [ "${{ steps.check-tag.outputs.tag_exists }}" == "true" ]; then
+            git push origin HEAD:refs/tags/v${{ steps.package-version.outputs.version }} -f
+            echo "Updated existing tag v${{ steps.package-version.outputs.version }} with current master"
+          else
+            git push origin "v${{ steps.package-version.outputs.version }}"
+            echo "Pushed new tag v${{ steps.package-version.outputs.version }}"
+          fi
+
   docker-push:
     name: Push Docker image to GHCR
-    needs: check-tests
+    needs: [check-tests, create-version-tag]
     runs-on: ubuntu-latest
     permissions:
       contents: read
@@ -64,11 +143,13 @@ jobs:
     steps:
       - uses: actions/checkout@v4
 
-      - name: Get package version
+      # Always get package version directly from package.json to ensure consistency
+      - name: Get package version directly
         id: package-version
         run: |
-          VERSION=$(node -p "require('./package.json').version")
-          echo "version=$VERSION" >> $GITHUB_OUTPUT
+          PKG_VERSION=$(node -p "require('./package.json').version")
+          echo "Version from package.json: $PKG_VERSION"
+          echo "version=$PKG_VERSION" >> $GITHUB_OUTPUT
 
       - name: Set up Docker Buildx
         uses: docker/setup-buildx-action@v3
@@ -119,12 +200,13 @@ jobs:
     steps:
       - uses: actions/checkout@v4
 
-      - name: Get package version
+      # Always get package version directly from package.json to ensure consistency
+      - name: Get package version directly
         id: package-version
         run: |
-          VERSION=$(node -p "require('./package.json').version")
-          echo "Version from package.json: $VERSION"
-          echo "version=$VERSION" >> $GITHUB_OUTPUT
+          PKG_VERSION=$(node -p "require('./package.json').version")
+          echo "Version from package.json: $PKG_VERSION"
+          echo "version=$PKG_VERSION" >> $GITHUB_OUTPUT
 
       - name: Setup SSH key
         run: |
@@ -138,15 +220,8 @@ jobs:
           # Create base directory with proper permissions
           ssh cinas-ext "mkdir -p ${{ secrets.NAS_FRONTEND_PATH }} && chmod 755 ${{ secrets.NAS_FRONTEND_PATH }}"
 
-          # Create nginx configuration directory and logs directory
-          ssh cinas-ext "mkdir -p ${{ secrets.NAS_FRONTEND_PATH }}/nginx/logs && chmod 755 ${{ secrets.NAS_FRONTEND_PATH }}/nginx/logs"
-
-      - name: Check nginx configuration
-        run: |
-          if [ ! -f "nginx.conf" ]; then
-            echo "Error: nginx.conf file is missing in the repository"
-            exit 1
-          fi
+          # Create subdirectories with proper permissions
+          ssh cinas-ext "mkdir -p ${{ secrets.NAS_FRONTEND_PATH }}/{logs,nginx} && chmod 755 ${{ secrets.NAS_FRONTEND_PATH }}/{logs,nginx}"
 
       - name: Check Docker version on NAS
         run: |
@@ -170,23 +245,24 @@ jobs:
 
           # Set version variables once at the beginning
           REPO="$(echo '${{ github.repository }}' | tr '[:upper:]' '[:lower:]')"
+          # Always use package.json version directly to ensure consistency
           VERSION="${{ steps.package-version.outputs.version }}"
           SHA_SHORT=$(echo "${{ github.sha }}" | cut -c1-7)
           echo "Using repository: ${REPO}, version: ${VERSION}, SHA: ${SHA_SHORT}"
 
-          # Verify version is not empty
+          # Fail if version is empty (critical error)
           if [ -z "$VERSION" ]; then
-            echo "ERROR: Version is empty! Using default version 0.0.0"
-            VERSION="0.0.0"
+            echo "ERROR: Version is empty! This is a critical error."
+            echo "Package.json might be invalid or not accessible."
+            exit 1
           fi
 
           # Debug package.json content
           echo "Package.json content:"
           cat package.json | grep version
 
-          # Update local docker-compose.yml to use both version and short SHA for uniqueness
+          # Update local docker-compose.yml to use version tag
           echo "Updating local docker-compose.yml..."
-          # Use version tag for usual tracking, but docker will always fetch the latest image with this tag
           sed -i.bak "s|image:.*|image: ghcr.io/${REPO}:${VERSION}|" docker-compose.yml
           echo "Updated docker-compose.yml content:"
           cat docker-compose.yml
