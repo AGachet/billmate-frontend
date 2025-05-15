@@ -9,7 +9,7 @@ const testData = {
   emailInvalid: 'invalid-email',
   firstName: 'Bill',
   lastName: 'Mate',
-  confirmAccountToken: 'confirm-account-token',
+  confirmAccountToken: 'eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJmaXJzdG5hbWUiOiJCaWxsIiwibGFzdG5hbWUiOiJNYXRlIiwiZW1haWwiOiJiaWxsLm1hdGVAZGlhbW9uZGZvcmdlLmZyIn0.signature',
   resetPasswordToken: 'reset-password-token'
 }
 

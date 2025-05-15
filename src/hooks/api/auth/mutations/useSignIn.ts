@@ -25,6 +25,8 @@ export const useSignInSchema = () => {
       .email({ message: tAuth('fields.tk_emailError_') }),
     password: z.string().min(1, { message: tAuth('fields.tk_passwordRequired_') }),
     confirmAccountToken: z.string().optional(),
+    firstname: z.string().optional(),
+    lastname: z.string().optional(),
     locale: z
       .string()
       .optional()

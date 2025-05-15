@@ -136,16 +136,12 @@ test.describe('Authentication Flow', () => {
 
     // Check for the presence of elements
     await expect(page.getByRole('heading', selectors.signUp.title)).toBeVisible()
-    await expect(page.getByLabel(selectors.fields.firstName)).toBeVisible()
-    await expect(page.getByLabel(selectors.fields.lastName)).toBeVisible()
     await expect(page.getByLabel(selectors.fields.email)).toBeVisible()
     await expect(page.getByLabel(selectors.fields.password)).toBeVisible()
     await expect(signUpButton).toBeVisible()
 
     // Test with empty fields
     await signUpButton.click()
-    await expect(page.getByText(selectors.errors.requiredFirstName)).toBeVisible()
-    await expect(page.getByText(selectors.errors.requiredLastName)).toBeVisible()
     await expect(page.getByText(selectors.errors.requiredEmail)).toBeVisible()
     await expect(page.getByText(selectors.errors.shortPassword)).toBeVisible()
 
@@ -162,8 +158,6 @@ test.describe('Authentication Flow', () => {
     await expect(page.getByText(selectors.errors.shortPassword)).toBeVisible()
 
     // Test successful creation
-    await page.getByLabel(selectors.fields.firstName).fill(testData.firstName)
-    await page.getByLabel(selectors.fields.lastName).fill(testData.lastName)
     await page.getByLabel(selectors.fields.email).fill(testData.email)
     await page.getByLabel(selectors.fields.password).fill(testData.passwordValid)
 
@@ -196,7 +190,11 @@ test.describe('Authentication Flow', () => {
     await (page as CustomPage).mockRoute(testApi.signIn.URL, async (route) => {
       const json = await route.request().postDataJSON()
       expect(json.confirmAccountToken).toBe(testData.confirmAccountToken)
-
+      // Vérifie que les champs sont bien envoyés
+      expect(json.firstname).toBe(testData.firstName)
+      expect(json.lastname).toBe(testData.lastName)
+      expect(json.email).toBe(testData.email)
+      expect(json.locale).toBeDefined()
       await route.fulfill({
         status: testApi.signIn.success.status,
         contentType: 'application/json',
@@ -217,7 +215,12 @@ test.describe('Authentication Flow', () => {
 
     // Navigate to the signin page and fill the form
     await page.goto(`${selectors.signIn.URL}?confirmAccountToken=${testData.confirmAccountToken}`)
-    await page.getByLabel(selectors.fields.email).fill(testData.email)
+
+    // Vérifie que les champs sont pré-remplis
+    await expect(page.getByLabel(selectors.fields.firstName)).toHaveValue(testData.firstName)
+    await expect(page.getByLabel(selectors.fields.lastName)).toHaveValue(testData.lastName)
+    await expect(page.getByLabel(selectors.fields.email)).toHaveValue(testData.email)
+
     await page.getByLabel(selectors.fields.password).fill(testData.passwordValid)
 
     // Submit and validate
