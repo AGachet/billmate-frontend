@@ -18,8 +18,6 @@ const tAuth = (key: string) => i18next.t(key, { ns: 'auth' })
  */
 export const useSignUpSchema = () => {
   const payload = z.object({
-    firstname: z.string().min(1, { message: tAuth('fields.tk_firstNameError_') }),
-    lastname: z.string().min(1, { message: tAuth('fields.tk_lastNameError_') }),
     email: z
       .string()
       .min(1, { message: tAuth('fields.tk_emailRequired_') })
