@@ -14,14 +14,35 @@ const tAuth = (key: string) => i18next.t(key, { ns: 'auth' })
  * Schemas & DTOs
  */
 export const useMeSchema = () => {
+  const accountSchema = z.object({
+    id: z.string(),
+    name: z.string(),
+    description: z.string().nullable(),
+    isActive: z.boolean()
+  })
+
+  const organizationSchema = z.object({
+    id: z.string(),
+    name: z.string()
+  })
+
+  const entitySchema = z.object({
+    id: z.string(),
+    name: z.string(),
+    isActive: z.boolean(),
+    organization: organizationSchema.nullable()
+  })
+
   const response = z.object({
     userId: z.string(),
+    email: z.string(),
     firstname: z.string().nullable(),
     lastname: z.string().nullable(),
-    email: z.string(),
-    roles: z.array(z.string()),
-    modules: z.array(z.string()),
-    permissions: z.array(z.string()),
+    roles: z.array(z.string()).nonempty(),
+    modules: z.array(z.string()).nonempty(),
+    permissions: z.array(z.string()).nonempty(),
+    accounts: z.array(accountSchema).nonempty(),
+    entities: z.array(entitySchema),
     createdAt: z.string()
   })
 

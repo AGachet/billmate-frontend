@@ -1,7 +1,14 @@
 /**
  * Resources
  */
+import * as React from 'react'
 import { Outlet } from 'react-router-dom'
+
+/**
+ * Dependencies
+ */
+import { BreadcrumbProvider } from '@/components/ui/custom/breadcrumb-context'
+import { useBreadcrumb } from '@/hooks/ui/useBreadcrumb'
 
 /**
  * Components
@@ -14,50 +21,58 @@ import { SidebarInset, SidebarProvider, SidebarTrigger } from '@/components/ui/s
 /**
  * React declaration
  */
-export const LayoutLogged = () => {
+const LayoutLoggedContent = () => {
+  const { items } = useBreadcrumb()
+
   const renderBreadcrumbItems = () => (
     <BreadcrumbList>
-      <BreadcrumbItem className="hidden md:block">
-        <BreadcrumbLink href="#">Building Your Application</BreadcrumbLink>
-      </BreadcrumbItem>
-      <BreadcrumbSeparator className="hidden md:block" />
-      <BreadcrumbItem>
-        <BreadcrumbPage>Data Fetching</BreadcrumbPage>
-      </BreadcrumbItem>
+      {items.map((item, index) => (
+        <React.Fragment key={index}>
+          {index > 0 && <BreadcrumbSeparator />}
+          <BreadcrumbItem>{index === items.length - 1 ? <BreadcrumbPage>{item.label}</BreadcrumbPage> : <BreadcrumbLink href="#">{item.label}</BreadcrumbLink>}</BreadcrumbItem>
+        </React.Fragment>
+      ))}
     </BreadcrumbList>
   )
 
   const renderHeader = () => (
-    <header className="flex h-16 shrink-0 items-center gap-2 transition-[width,height] ease-linear group-has-[[data-collapsible=icon]]/sidebar-wrapper:h-12">
+    <header className="flex h-16 shrink-0 items-center gap-2 border-b transition-[width,height] ease-linear group-has-[[data-collapsible=icon]]/sidebar-wrapper:h-12">
       <div className="flex items-center gap-2 px-4">
         <SidebarTrigger className="-ml-1" />
         <Separator orientation="vertical" className="mr-2 h-4" />
         <Breadcrumb>{renderBreadcrumbItems()}</Breadcrumb>
       </div>
+      {items.length > 0 && items[items.length - 1].description && <div className="ml-4 text-sm text-muted-foreground">{items[items.length - 1].description}</div>}
     </header>
   )
 
-  const renderPlaceholderGrid = () => (
-    <div className="grid auto-rows-min gap-4 md:grid-cols-3">
-      {[...Array(3)].map((_, i) => (
-        <div key={i} className="aspect-video rounded-xl bg-muted/50" />
-      ))}
-    </div>
-  )
+  // const renderPlaceholderGrid = () => (
+  //   <div className="grid auto-rows-min gap-4 md:grid-cols-3">
+  //     {[...Array(3)].map((_, i) => (
+  //       <div key={i} className="aspect-video rounded-xl bg-muted/50" />
+  //     ))}
+  //   </div>
+  // )
 
   return (
     <SidebarProvider>
       <LayoutSidebar />
       <SidebarInset>
         {renderHeader()}
-        <div className="flex flex-1 flex-col gap-4 p-4 pt-0">
+        <div className="flex flex-1 flex-col gap-4 p-4">
           <main>
             <Outlet />
           </main>
-          {renderPlaceholderGrid()}
-          <div className="min-h-[100vh] flex-1 rounded-xl bg-muted/50 md:min-h-min" />
+          {/* {renderPlaceholderGrid()} */}
+          {/* <div className="min-h-[100vh] flex-1 rounded-xl bg-muted/50 md:min-h-min" /> */}
         </div>
       </SidebarInset>
     </SidebarProvider>
   )
 }
+
+export const LayoutLogged = () => (
+  <BreadcrumbProvider>
+    <LayoutLoggedContent />
+  </BreadcrumbProvider>
+)

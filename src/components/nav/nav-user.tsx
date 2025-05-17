@@ -3,6 +3,8 @@
  */
 import { useSignOut } from '@/hooks/api/auth/mutations/useSignOut'
 import { useMe } from '@/hooks/api/auth/queries/useMe'
+import { useTranslation } from 'react-i18next'
+import { Link } from 'react-router-dom'
 
 /**
  * Components
@@ -14,7 +16,7 @@ import { SidebarMenu, SidebarMenuButton, SidebarMenuItem, useSidebar } from '@/c
 /**
  * Icons
  */
-import { BadgeCheck, Bell, ChevronsUpDown, CreditCard, LogOut, Sparkles } from 'lucide-react'
+import { BadgeCheck, Bell, ChevronsUpDown, LogOut, Sparkles } from 'lucide-react'
 
 /**
  * React declaration
@@ -23,6 +25,7 @@ export function NavUser() {
   const { isMobile } = useSidebar()
   const { submit: signOut } = useSignOut()
   const { data: user } = useMe()
+  const { t: tNav } = useTranslation('nav')
 
   if (!user) return null
 
@@ -68,13 +71,11 @@ export function NavUser() {
             </DropdownMenuGroup>
             <DropdownMenuSeparator />
             <DropdownMenuGroup>
-              <DropdownMenuItem>
-                <BadgeCheck />
-                Account
-              </DropdownMenuItem>
-              <DropdownMenuItem>
-                <CreditCard />
-                Billing
+              <DropdownMenuItem asChild className="cursor-pointer">
+                <Link to="/account?tab=overview">
+                  <BadgeCheck />
+                  {tNav('user-navigation.tk_account-management_')}
+                </Link>
               </DropdownMenuItem>
               <DropdownMenuItem>
                 <Bell />
@@ -84,7 +85,7 @@ export function NavUser() {
             <DropdownMenuSeparator />
             <DropdownMenuItem onClick={() => signOut()} className="cursor-pointer">
               <LogOut />
-              Sign out
+              {tNav('user-navigation.tk_signout_')}
             </DropdownMenuItem>
           </DropdownMenuContent>
         </DropdownMenu>
