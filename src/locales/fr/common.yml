@@ -17,5 +17,12 @@ loading:
   tk_loadingUpdate_: 'Mise à jour en cours...'
   tk_loading_: 'Chargement en cours...'
 
+items:
+  tk_users_: Utilisateurs
+  tk_entities_: Entités
+  tk_roles_: Rôles
+
 other:
   tk_or_: 'ou'
+  tk_active_: 'Actif'
+  tk_inactive_: 'Inactif'
