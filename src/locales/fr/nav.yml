@@ -16,3 +16,7 @@ main-navigation:
   tk_product-costs_: 'Coûts des produits'
   tk_service-costs_: 'Coûts des services'
   tk_travel-costs_: 'Frais de déplacement'
+
+user-navigation:
+  tk_account-management_: 'Gestion du compte'
+  tk_signout_: 'Se déconnecter'
