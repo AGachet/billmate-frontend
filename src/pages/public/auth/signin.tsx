@@ -10,7 +10,7 @@ import { Link, useNavigate } from 'react-router-dom'
 /**
  * Dependencies
  */
-import { useIsSessionActive } from '@/hooks/auth/session'
+import { useIsSessionActive } from '@/hooks/auth/useIsSession'
 import { useModuleAccess } from '@/hooks/auth/useModuleAccess'
 import { extractTokenFromUrl } from '@/utils/tokenExtractor'
 
