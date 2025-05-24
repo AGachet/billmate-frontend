@@ -9,7 +9,7 @@ import { Link } from 'react-router-dom'
 /**
  * Components
  */
-import { Avatar, AvatarFallback } from '@/components/ui/shadcn/avatar'
+import { Avatar } from '@/components/ui/custom/avatar'
 import { DropdownMenu, DropdownMenuContent, DropdownMenuGroup, DropdownMenuItem, DropdownMenuLabel, DropdownMenuSeparator, DropdownMenuTrigger } from '@/components/ui/shadcn/dropdown-menu'
 import { SidebarMenu, SidebarMenuButton, SidebarMenuItem, useSidebar } from '@/components/ui/shadcn/sidebar'
 
@@ -34,9 +34,7 @@ export function NavUser() {
 
   const renderUserInfo = () => (
     <div className="flex items-center gap-2 px-1 py-1.5 text-left text-sm">
-      <Avatar className="h-8 w-8 rounded-lg">
-        <AvatarFallback className="rounded-lg">{initials}</AvatarFallback>
-      </Avatar>
+      <Avatar initials={initials} bgColor="bg-[#D6E6FF]" textColor="text-[#3B82F6]" size="sm" />
       <div className="grid flex-1 text-left text-sm leading-tight">
         <span className="truncate font-semibold">{userName}</span>
         <span className="truncate text-xs">{user.email}</span>
@@ -50,9 +48,7 @@ export function NavUser() {
         <DropdownMenu>
           <DropdownMenuTrigger asChild>
             <SidebarMenuButton size="lg" className="data-[state=open]:bg-sidebar-accent data-[state=open]:text-sidebar-accent-foreground">
-              <Avatar className="h-8 w-8 rounded-lg">
-                <AvatarFallback className="rounded-lg">{initials}</AvatarFallback>
-              </Avatar>
+              <Avatar initials={initials} bgColor="bg-[#D6E6FF]" textColor="text-[#3B82F6]" size="sm" />
               <div className="grid flex-1 text-left text-sm leading-tight">
                 <span className="truncate font-semibold">{userName}</span>
                 <span className="truncate text-xs">{user.email}</span>
@@ -65,7 +61,7 @@ export function NavUser() {
             <DropdownMenuSeparator />
             <DropdownMenuGroup>
               <DropdownMenuItem>
-                <Sparkles />
+                <Sparkles className="mr-1 size-5" />
                 Upgrade to Pro
               </DropdownMenuItem>
             </DropdownMenuGroup>
@@ -73,18 +69,18 @@ export function NavUser() {
             <DropdownMenuGroup>
               <DropdownMenuItem asChild className="cursor-pointer">
                 <Link to="/account?tab=overview">
-                  <BadgeCheck />
+                  <BadgeCheck className="mr-2 size-5" />
                   {tNav('user-navigation.tk_account-management_')}
                 </Link>
               </DropdownMenuItem>
               <DropdownMenuItem>
-                <Bell />
+                <Bell className="mr-2 size-5" />
                 Notifications
               </DropdownMenuItem>
             </DropdownMenuGroup>
             <DropdownMenuSeparator />
             <DropdownMenuItem onClick={() => signOut()} className="cursor-pointer">
-              <LogOut />
+              <LogOut className="mr-2 size-5" />
               {tNav('user-navigation.tk_signout_')}
             </DropdownMenuItem>
           </DropdownMenuContent>
