@@ -13,6 +13,9 @@ export const SignUp = lazy(() => import('@/pages/public/auth').then((module) => 
 export const ResetPasswordRequest = lazy(() => import('@/pages/public/auth').then((module) => ({ default: module.ResetPasswordRequest })))
 export const ResetPassword = lazy(() => import('@/pages/public/auth').then((module) => ({ default: module.ResetPassword })))
 
+// --- invitations ---
+export const UserInvitation = lazy(() => import('@/pages/public/invitations/user-invitation').then((module) => ({ default: module.UserInvitation })))
+
 // --- errors ---
 export const NotFound = lazy(() => import('@/pages/public/errors/not-found').then((module) => ({ default: module.NotFound })))
 
