@@ -33,18 +33,23 @@ export const useMeSchema = () => {
     organization: organizationSchema.nullable()
   })
 
-  const response = z.object({
-    userId: z.string(),
-    email: z.string(),
-    firstname: z.string().nullable(),
-    lastname: z.string().nullable(),
-    roles: z.array(z.string()).nonempty(),
-    modules: z.array(z.string()).nonempty(),
-    permissions: z.array(z.string()).nonempty(),
-    accounts: z.array(accountSchema).nonempty(),
-    entities: z.array(entitySchema),
-    createdAt: z.string()
-  })
+  const response = z
+    .object({
+      userId: z.string(),
+      email: z.string(),
+      firstname: z.string().nullable(),
+      lastname: z.string().nullable(),
+      roles: z.array(z.string()).nonempty(),
+      modules: z.array(z.string()).nonempty(),
+      permissions: z.array(z.string()).nonempty(),
+      accounts: z.array(accountSchema),
+      entities: z.array(entitySchema),
+      createdAt: z.string()
+    })
+    .refine((data) => data.accounts.length > 0 || data.entities.length > 0, {
+      message: 'Either accounts or entities must be non-empty',
+      path: ['accounts', 'entities']
+    })
 
   return { response }
 }

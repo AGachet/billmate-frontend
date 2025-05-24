@@ -5,6 +5,7 @@ import { useQuery } from '@tanstack/react-query'
 import i18next from 'i18next'
 import { z } from 'zod'
 
+import { useEntityCreateSchema } from '@/hooks/api/entities/mutations/useEntityCreate'
 import apiClient from '@/lib/api/client'
 
 // Translation
@@ -14,6 +15,8 @@ const tAccounts = (key: string) => i18next.t(key, { ns: 'accounts' })
  * Schemas & DTOs
  */
 export const useAccountSchema = () => {
+  const { response: entityResponse } = useEntityCreateSchema()
+
   const peopleSchema = z.object({
     id: z.string(),
     firstname: z.string().nullable(),
@@ -25,15 +28,13 @@ export const useAccountSchema = () => {
     name: z.string()
   })
 
-  const entitySchema = z.object({
+  const entityWithOrganizationSchema = z.object({
     id: z.string(),
     name: z.string(),
-    description: z.string().nullable(),
-    isActive: z.boolean(),
-    organization: organizationSchema.nullable(),
-    createdAt: z.string(),
-    updatedAt: z.string()
+    organization: organizationSchema.nullable()
   })
+
+  const entitySchema = entityResponse.omit({ users: true, roles: true })
 
   const userRoleSchema = z.object({
     id: z.number(),
@@ -46,10 +47,10 @@ export const useAccountSchema = () => {
     isActive: z.boolean(),
     people: peopleSchema,
     roles: z.array(userRoleSchema),
-    entityIds: z.array(z.string()),
+    entities: z.array(entityWithOrganizationSchema),
     isDirectlyLinked: z.boolean(),
-    createdAt: z.string(),
-    updatedAt: z.string()
+    createdAt: z.string().transform((str) => new Date(str)),
+    updatedAt: z.string().transform((str) => new Date(str))
   })
 
   const accountRoleSchema = z.object({
@@ -58,8 +59,8 @@ export const useAccountSchema = () => {
     description: z.string().nullable(),
     isActive: z.boolean(),
     isGlobal: z.boolean(),
-    createdAt: z.string(),
-    updatedAt: z.string()
+    createdAt: z.string().transform((str) => new Date(str)),
+    updatedAt: z.string().transform((str) => new Date(str))
   })
 
   const collectionResponseSchema = <T extends z.ZodType>(schema: T) =>
@@ -73,14 +74,14 @@ export const useAccountSchema = () => {
     name: z.string(),
     description: z.string().nullable(),
     isActive: z.boolean(),
-    createdAt: z.string(),
-    updatedAt: z.string(),
+    createdAt: z.string().transform((str) => new Date(str)),
+    updatedAt: z.string().transform((str) => new Date(str)),
     users: collectionResponseSchema(accountUserSchema),
     entities: collectionResponseSchema(entitySchema),
     roles: collectionResponseSchema(accountRoleSchema)
   })
 
-  return { response }
+  return { response, accountUserSchema }
 }
 
 export type AccountResponseDto = z.infer<ReturnType<typeof useAccountSchema>['response']>
