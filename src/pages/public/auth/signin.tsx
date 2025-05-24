@@ -128,7 +128,7 @@ export function SignIn() {
     if (confirmAccountToken) {
       payload.confirmAccountToken = confirmAccountToken
 
-      // Si c'est une première connexion avec le token, ajoutez les informations du profil
+      // If it's the first login with the token, add the profile information
       if (isFirstLogin && values.firstname && values.lastname) {
         payload.firstname = values.firstname
         payload.lastname = values.lastname
