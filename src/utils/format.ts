@@ -1,5 +1,5 @@
 /**
- * Utilities functions
+ * Formatting utilities
  */
 
 /**
@@ -41,10 +41,16 @@ export function formatCurrency(amount: number, currency = 'EUR', locale?: string
  * @returns Initials (1-2 characters)
  */
 export function getInitials(firstname?: string | null, lastname?: string | null): string {
-  const first = firstname?.charAt(0) || ''
-  const last = lastname?.charAt(0) || ''
-
-  return (first + last).toUpperCase() || 'U'
+  if (firstname && lastname) {
+    return `${firstname[0]}${lastname[0]}`.toUpperCase()
+  }
+  if (firstname) {
+    return firstname[0].toUpperCase()
+  }
+  if (lastname) {
+    return lastname[0].toUpperCase()
+  }
+  return ''
 }
 
 /**
