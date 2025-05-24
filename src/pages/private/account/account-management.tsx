@@ -10,6 +10,7 @@ import { useNavigate, useSearchParams } from 'react-router-dom'
  * Components
  */
 import { Tabs, TabsContent, TabsList, TabsTrigger } from '@/components/ui/shadcn/tabs'
+import { AccountEntities } from './account-entities'
 import { AccountOverview } from './account-overview'
 import { AccountUsers } from './account-users'
 
@@ -40,16 +41,16 @@ export function AccountManagement() {
 
   const tabTriggerClass = `
       transition-all duration-300
-      flex-1 py-1.5 rounded-sm uppercase opacity-70 border border-dashed border-gray-400 border-opacity-0
+      flex-1 p-1 rounded-sm uppercase opacity-70 border border-dashed border-gray-400 border-opacity-0
       hover:opacity-100 hover:border-opacity-60
-      data-[state=active]:opacity-100 data-[state=active]:border-opacity-0 data-[state=active]:bg-white data-[state=active]:font-bold data-[state=active]:text-sm data-[state=active]:text-muted-foreground data-[state=active]:shadow-sm
+      data-[state=active]:opacity-100 data-[state=active]:border-opacity-0 data-[state=active]:bg-white data-[state=active]:font-bold data-[state=active]:text-sm data-[state=active]:text-muted-foreground data-[state=active]:shadow-none
     `
 
   return (
     <div className="container mx-auto">
       <Tabs value={currentTab} onValueChange={handleTabChange} className="space-y-4">
         <TabsList className="flex h-10 w-full justify-between space-x-1 rounded-md bg-muted">
-          {['overview', 'users', 'entities', 'roles'].map((tab) => (
+          {['overview', 'entities', 'users'].map((tab) => (
             <TabsTrigger key={tab} value={tab} className={tabTriggerClass}>
               {tAccount(`tabs.tk_${tab}_`)}
             </TabsTrigger>
@@ -64,9 +65,9 @@ export function AccountManagement() {
           <AccountUsers />
         </TabsContent>
 
-        <TabsContent value="entities">{/* Entities tab content will go here */}</TabsContent>
-
-        <TabsContent value="roles">{/* Roles tab content will go here */}</TabsContent>
+        <TabsContent value="entities">
+          <AccountEntities />
+        </TabsContent>
       </Tabs>
     </div>
   )
