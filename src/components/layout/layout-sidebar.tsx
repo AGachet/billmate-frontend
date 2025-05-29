@@ -7,6 +7,7 @@ import { cn } from '@/utils/ui'
  * Dependencies
  */
 import { useTranslation } from 'react-i18next'
+import { useNavigate } from 'react-router-dom'
 
 /**
  * Components
@@ -14,7 +15,6 @@ import { useTranslation } from 'react-i18next'
 import { Button } from '@/components/ui/shadcn/button'
 import { Sidebar, SidebarContent, SidebarFooter, SidebarHeader, SidebarRail, useSidebar } from '@/components/ui/shadcn/sidebar'
 
-import { TeamSwitcher } from '@/components/layout/team-switcher'
 import { NavSection } from '@/components/nav/nav-section'
 import { NavUser } from '@/components/nav/nav-user'
 
@@ -45,6 +45,8 @@ import {
  */
 import type { NavSectionItem } from '@/components/nav/nav-section'
 import type { ComponentProps } from 'react'
+
+import { Logo } from '@/components/ui/custom/logo'
 
 type User = {
   firstname: string
@@ -219,20 +221,27 @@ const data: SideBarConfig = {
  */
 export const LayoutSidebar = ({ ...props }: ComponentProps<typeof Sidebar>) => {
   const { state } = useSidebar()
-  const { t } = useTranslation('nav')
+  const { t: tNav } = useTranslation('nav')
   const isCollapsed = state === 'collapsed'
+  const navigate = useNavigate()
 
-  const buttonClassName = cn('mt-6', isCollapsed ? 'mx-2 overflow-hidden px-2 text-xs' : 'mx-6 text-base')
+  const buttonClassName = cn(
+    'mt-6 flex items-center gap-2 font-semibold transition-all duration-200',
+    'rounded-sm shadow-none',
+    'bg-gradient-to-r from-orange-400 to-orange-600 text-white',
+    'hover:from-orange-500 hover:to-orange-700 hover:scale-[1.03]',
+    isCollapsed ? 'mx-2 overflow-hidden text-xs justify-center' : 'mx-3 px-4 py-2 text-base justify-start'
+  )
 
   return (
     <Sidebar collapsible="icon" {...props}>
       <SidebarHeader>
-        <TeamSwitcher teams={data.teams} />
+        <Logo className={!isCollapsed ? 'cursor-pointer px-4 pt-2' : 'cursor-pointer'} isLong={!isCollapsed} onClick={() => navigate('/dashboard')} />
       </SidebarHeader>
       <SidebarContent>
-        <Button className={buttonClassName}>
-          <ChartNoAxesCombined className="cursor-pointer" />
-          {!isCollapsed && t('main-navigation.tk_dashboard_')}
+        <Button className={buttonClassName} onClick={() => navigate('/dashboard')} tabIndex={0} aria-label={tNav('main-navigation.tk_dashboard_')}>
+          <ChartNoAxesCombined className="size-5 shrink-0 cursor-pointer" />
+          {!isCollapsed && <span className="ml-2 truncate">{tNav('main-navigation.tk_dashboard_')}</span>}
         </Button>
         {data.navigation.map((section, index) => (
           <NavSection key={`nav-section-${index}`} section={section} />

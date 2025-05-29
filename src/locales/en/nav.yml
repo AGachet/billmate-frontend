@@ -1,5 +1,5 @@
 main-navigation:
-  tk_dashboard_: 'Dashboard'
+  tk_dashboard_: 'Main dashboard'
   tk_sales-management_: 'Sales management'
   tk_customer-management_: 'Customer management'
   tk_cost-management_: 'Cost management'

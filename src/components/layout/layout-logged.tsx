@@ -1,7 +1,7 @@
 /**
  * Resources
  */
-import * as React from 'react'
+import { Fragment } from 'react'
 import { Outlet } from 'react-router-dom'
 
 /**
@@ -27,10 +27,10 @@ const LayoutLoggedContent = () => {
   const renderBreadcrumbItems = () => (
     <BreadcrumbList>
       {items.map((item, index) => (
-        <React.Fragment key={index}>
+        <Fragment key={index}>
           {index > 0 && <BreadcrumbSeparator />}
           <BreadcrumbItem>{index === items.length - 1 ? <BreadcrumbPage>{item.label}</BreadcrumbPage> : <BreadcrumbLink href="#">{item.label}</BreadcrumbLink>}</BreadcrumbItem>
-        </React.Fragment>
+        </Fragment>
       ))}
     </BreadcrumbList>
   )
@@ -46,14 +46,6 @@ const LayoutLoggedContent = () => {
     </header>
   )
 
-  // const renderPlaceholderGrid = () => (
-  //   <div className="grid auto-rows-min gap-4 md:grid-cols-3">
-  //     {[...Array(3)].map((_, i) => (
-  //       <div key={i} className="aspect-video rounded-xl bg-muted/50" />
-  //     ))}
-  //   </div>
-  // )
-
   return (
     <SidebarProvider>
       <LayoutSidebar />
@@ -63,8 +55,6 @@ const LayoutLoggedContent = () => {
           <main>
             <Outlet />
           </main>
-          {/* {renderPlaceholderGrid()} */}
-          {/* <div className="min-h-[100vh] flex-1 rounded-xl bg-muted/50 md:min-h-min" /> */}
         </div>
       </SidebarInset>
     </SidebarProvider>

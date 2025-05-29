@@ -17,6 +17,7 @@ import { extractTokenFromUrl } from '@/utils/tokenExtractor'
 /**
  * Components
  */
+import { Logo } from '@/components/ui/custom/logo'
 import { Alert, AlertDescription } from '@/components/ui/shadcn/alert'
 import { Button } from '@/components/ui/shadcn/button'
 import { Card } from '@/components/ui/shadcn/card'
@@ -61,7 +62,7 @@ export function SignIn() {
       password: '',
       firstname: '',
       lastname: '',
-      locale: navigator.language
+      locale: navigator.language.split('-')[0].toUpperCase() as 'FR' | 'EN'
     }
   })
 
@@ -111,7 +112,11 @@ export function SignIn() {
 
   // Redirect on successful login
   useEffect(() => {
-    if (signInMutation.isSuccess || isSessionActive) navigate('/dashboard')
+    if (signInMutation.isSuccess || isSessionActive) {
+      console.log('signInMutation.isSuccess', signInMutation.isSuccess)
+      console.log('isSessionActive', isSessionActive)
+      navigate('/dashboard')
+    }
   }, [isSessionActive, signInMutation.isSuccess, navigate])
 
   const onSubmit = (values: SignInPayloadDto) => {
@@ -216,7 +221,8 @@ export function SignIn() {
   }
 
   return (
-    <div className="flex h-screen items-center justify-center bg-gray-50">
+    <div className="flex h-screen flex-col items-center bg-gray-50">
+      <Logo isLong className="max-w-xs px-4 py-20" />
       <Card className="w-full max-w-md p-8">
         <div className="text-center">
           <h2 className="text-3xl font-bold tracking-tight text-gray-900">{tAuth('signin.tk_title_')}</h2>

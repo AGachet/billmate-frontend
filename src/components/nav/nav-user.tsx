@@ -3,6 +3,7 @@
  */
 import { useSignOut } from '@/hooks/api/auth/mutations/useSignOut'
 import { useMe } from '@/hooks/api/auth/queries/useMe'
+import { useModuleAccess } from '@/hooks/auth/useModuleAccess'
 import { useTranslation } from 'react-i18next'
 import { Link } from 'react-router-dom'
 
@@ -26,11 +27,12 @@ export function NavUser() {
   const { submit: signOut } = useSignOut()
   const { data: user } = useMe()
   const { t: tNav } = useTranslation('nav')
+  const { hasModuleAccess } = useModuleAccess()
 
   if (!user) return null
 
-  const userName = `${user.firstname || ''} ${user.lastname || ''}`
-  const initials = `${user.firstname?.[0]?.toUpperCase() || ''}${user.lastname?.[0]?.toUpperCase() || ''}`
+  const userName = `${user.people.firstname || ''} ${user.people.lastname || ''}`
+  const initials = `${user.people.firstname?.[0]?.toUpperCase() || ''}${user.people.lastname?.[0]?.toUpperCase() || ''}`
 
   const renderUserInfo = () => (
     <div className="flex items-center gap-2 px-1 py-1.5 text-left text-sm">
@@ -67,12 +69,14 @@ export function NavUser() {
             </DropdownMenuGroup>
             <DropdownMenuSeparator />
             <DropdownMenuGroup>
-              <DropdownMenuItem asChild className="cursor-pointer">
-                <Link to="/account?tab=overview">
-                  <BadgeCheck className="mr-2 size-5" />
-                  {tNav('user-navigation.tk_account-management_')}
-                </Link>
-              </DropdownMenuItem>
+              {hasModuleAccess('ACCOUNT_ADMINISTRATION') && (
+                <DropdownMenuItem asChild className="cursor-pointer">
+                  <Link to="/account?tab=overview">
+                    <BadgeCheck className="mr-2 size-5" />
+                    {tNav('user-navigation.tk_account-management_')}
+                  </Link>
+                </DropdownMenuItem>
+              )}
               <DropdownMenuItem>
                 <Bell className="mr-2 size-5" />
                 Notifications
