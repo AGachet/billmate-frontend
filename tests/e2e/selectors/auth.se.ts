@@ -2,6 +2,7 @@
  * Testing Data
  */
 const testData = {
+  userId: '123e4567-e89b-12d3-a456-426614174000',
   email: 'bill.mate@diamondforge.fr',
   passwordShort: 'pass',
   passwordInvalid: 'password123',
@@ -9,7 +10,8 @@ const testData = {
   emailInvalid: 'invalid-email',
   firstName: 'Bill',
   lastName: 'Mate',
-  confirmAccountToken: 'eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJmaXJzdG5hbWUiOiJCaWxsIiwibGFzdG5hbWUiOiJNYXRlIiwiZW1haWwiOiJiaWxsLm1hdGVAZGlhbW9uZGZvcmdlLmZyIn0.signature',
+  confirmAccountToken:
+    'eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJlbWFpbCI6ImJpbGwubWF0ZUBkaWFtb25kZm9yZ2UuZnIiLCJzdWIiOiJjbWI4MWhrZjMwMDAwdDg0eGI5YmpscnNiIiwiZmlyc3RuYW1lIjoiQmlsbCIsImxhc3RuYW1lIjoiTWF0ZSIsImxvY2FsZSI6IkZSIiwiaWF0IjoxNzQ4NDQyNDQ0LCJleHAiOjE3NDkwNDcyNDR9.EbCtfmHe45W18fVf9nuf87ZgTqxJf6JaDGMbcCSqo3g',
   resetPasswordToken: 'reset-password-token'
 }
 
@@ -19,7 +21,7 @@ const testApi = {
     URL: '**/auth/signin',
     success: {
       status: 200,
-      body: { userId: '123e4567-e89b-12d3-a456-426614174000' }
+      body: { userId: testData.userId }
     },
     error: {
       status: 401,
@@ -45,13 +47,26 @@ const testApi = {
     success: {
       status: 200,
       body: {
-        userId: '123e4567-e89b-12d3-a456-426614174000',
+        userId: testData.userId,
         firstname: 'Bill',
         lastname: 'Mate',
         email: 'bill.mate@diamondforge.fr',
-        roles: ['user'],
-        modules: ['USER_ACCOUNT_PASSWORD_RECOVERY', 'USER_ACCOUNT_CREATION'],
-        permissions: ['USER_ACCOUNT_CREATE_OWN', 'PASSWORD_RECOVERY_LINK_REQUEST_OWN', 'PASSWORD_RECOVERY_RESET_OWN', 'USER_ACCOUNT_READ_OWN', 'USER_ACCOUNT_UPDATE_OWN'],
+        roles: ['admin'],
+        modules: ['ACCOUNT_ADMINISTRATION', 'ORGANIZATION_ADMINISTRATION', 'USER_ACCOUNT_PASSWORD_RECOVERY'],
+        permissions: [
+          'PASSWORD_RECOVERY_LINK_REQUEST_OWN',
+          'PASSWORD_RECOVERY_RESET_OWN',
+          'ACCOUNT_UPDATE',
+          'ACCOUNT_USER_MANAGEMENT',
+          'ACCOUNT_ENTITY_MANAGEMENT',
+          'ENTITY_CREATION',
+          'USER_ACCOUNTS_INVITATION',
+          'USER_ENTITIES_INVITATION',
+          'USER_ROLE_ALLOCATION',
+          'ENTITY_USER_MANAGEMENT',
+          'ORGANIZATION_CREATION',
+          'ORGANIZATION_UPDATE'
+        ],
         createdAt: new Date().toISOString()
       }
     }

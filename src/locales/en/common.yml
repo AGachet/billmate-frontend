@@ -1,7 +1,3 @@
-version:
-  free: 'Free version'
-  premium: 'Premium version'
-
 user:
   tk_firstName_: First name
   tk_firstNamePlaceholder_: Bill
@@ -19,11 +15,15 @@ loading:
 
 items:
   tk_users_: Users
+  tk_organization_: Organizations
   tk_entities_: Entities
   tk_roles_: Roles
 
 status:
   tk_title_: Status
+  tk_all_: All statuses
+  tk_pending_: Pending
+  tk_expired_: Expired
   tk_active_: Active
   tk_inactive_: Inactive
   tk_unknown_: Unknown
@@ -37,19 +37,36 @@ date:
 actions:
   tk_title_: Actions
   tk_edit_: Edit
+  tk_create_: Create
   tk_activate_: Activate
   tk_deactivate_: Deactivate
   tk_cancel_: Cancel
   tk_send_: Send
+  tk_resend_: Resend
 
 filters:
   tk_title_: Filters
   tk_status_: Status
   tk_sort-by_: Sort by
+  tk_select-entities_: Select entities
+  tk_selected-entities_: Selected entities
+  tk_select-roles_: Select roles
+  tk_selected-roles_: Selected roles
+  tk_show-account-users_: Account users
+  tk_search-placeholder_: Search...
+
+work-in-progress:
+  tk_page-under-construction_: This page is under construction.
+  tk_coming-soon_: Coming soon!
 
 other:
+  tk_name_: Name
+  tk_description_: Description
+  tk_type_: Type
+  tk_website_: Website
   tk_all_: 'All'
   tk_linked-to_: Linked to
+  tk_sent-at_: Sent at
   tk_or_: 'or'
   tk_to_: 'to'
   tk_of_: 'of'

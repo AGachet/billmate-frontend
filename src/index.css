@@ -3,7 +3,7 @@
 @tailwind utilities;
 
 .skeleton-shimmer-orange {
-  @apply bg-shimmer-orange animate-shimmer bg-[length:200%_100%];
+  @apply animate-shimmer bg-shimmer-orange bg-[length:200%_100%];
 }
 
 @layer base {
