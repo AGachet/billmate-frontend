@@ -122,8 +122,7 @@ export function InviteUserDialog({ isOpen, onOpenChange }: InviteUserDialogProps
       lastname: data.lastname,
       roleIds: data.roleIds,
       entityIds: data.entityIds,
-      accountIds: data.accountIds,
-      locale: navigator.language.split('-')[0].toUpperCase() as 'FR' | 'EN'
+      accountIds: data.accountIds
     }
 
     try {

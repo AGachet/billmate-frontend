@@ -44,6 +44,9 @@ actions:
   tk_send_: Send
   tk_resend_: Resend
 
+fields:
+  tk_localeError_: Invalid locale
+
 filters:
   tk_title_: Filters
   tk_status_: Status

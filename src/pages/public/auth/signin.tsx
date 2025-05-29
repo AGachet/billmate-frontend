@@ -61,8 +61,7 @@ export function SignIn() {
       email: '',
       password: '',
       firstname: '',
-      lastname: '',
-      locale: navigator.language.split('-')[0].toUpperCase() as 'FR' | 'EN'
+      lastname: ''
     }
   })
 
@@ -125,8 +124,7 @@ export function SignIn() {
     // Prepare payload
     const payload: SignInPayloadDto = {
       email: values.email,
-      password: values.password,
-      locale: values.locale
+      password: values.password
     }
 
     // Only add confirmAccountToken and user info if token exists

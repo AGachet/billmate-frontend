@@ -48,6 +48,9 @@ actions:
   tk_send_: Envoyer
   tk_resend_: Renvoyer
 
+fields:
+  tk_localeError_: Locale invalide
+
 filters:
   tk_title_: Filtres
   tk_status_: Statut
