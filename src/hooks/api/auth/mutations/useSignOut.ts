@@ -16,13 +16,10 @@ import apiClient from '@/lib/api/client'
 const tAuth = (key: string) => i18next.t(key, { ns: 'auth' })
 
 /**
- * Types
+ * Types, Schemas & DTOs
  */
-import type { MeResponseDto } from '@/hooks/api/auth/queries/useMe'
+import type { MeResponseDto } from '@/hooks/api/auth'
 
-/**
- * Schemas & DTOs
- */
 export const useSignOutSchema = () => {
   const payload = z.object({
     userId: z.string()
@@ -46,20 +43,15 @@ export const useSignOut = () => {
   const guest = useGuest()
   const schemas = useSignOutSchema()
 
-  // Get user data from cache or localStorage
-  const me = queryClient.getQueryData<MeResponseDto>(['authMe']) || JSON.parse(localStorage.getItem('authMe') || '{}')
+  // Get user data from cache (localStorage is only used to update the cache on refresh)
+  const me = queryClient.getQueryData<MeResponseDto>(['authMe'])
 
   const mutation = useMutation({
     mutationFn: async () => {
-      if (!me?.userId) {
-        // If no user data is available, just clear the cache and redirect
-        return { message: 'User already signed out' }
-      }
+      if (!me?.userId) return { message: 'User already signed out' }
 
       // Schema validation
-      const payload: SignOutPayloadDto = {
-        userId: me.userId
-      }
+      const payload: SignOutPayloadDto = { userId: me.userId }
       schemas.payload.parse(payload)
 
       // Send data to the API

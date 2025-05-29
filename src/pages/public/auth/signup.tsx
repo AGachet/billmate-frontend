@@ -47,8 +47,7 @@ export function SignUp() {
     resolver: zodResolver(schemas.payload),
     defaultValues: {
       email: '',
-      password: '',
-      locale: navigator.language
+      password: ''
     }
   })
 
