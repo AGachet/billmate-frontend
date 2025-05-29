@@ -2,34 +2,32 @@
  * Ressources
  */
 import { useQueryClient } from '@tanstack/react-query'
-import { ArrowUpDown, Building2, Plus, SearchIcon } from 'lucide-react'
+import { ArrowUpDown, Building2, Plus } from 'lucide-react'
 import { useEffect, useState } from 'react'
 import { useTranslation } from 'react-i18next'
 
 /**
  * Dependencies
  */
+import { EntityOrderBy, useAccountEntities } from '@/hooks/api/accounts/queries/useAccountEntities'
+import { useModuleAccess } from '@/hooks/auth/useModuleAccess'
 import { formatDate } from '@/utils/format'
 
 /**
  * Components
  */
 import { CreateEntityDialog } from '@/components/dialogs/create-entity-dialog'
+import { Filter, FilterGroup, FiltersContainer } from '@/components/ui/custom/filters-container'
+import { SearchFilter } from '@/components/ui/custom/search-filter'
+import { StatusFilter } from '@/components/ui/custom/status-filter'
 import { Avatar, AvatarFallback } from '@/components/ui/shadcn/avatar'
 import { Badge } from '@/components/ui/shadcn/badge'
 import { Button } from '@/components/ui/shadcn/button'
 import { Card, CardContent, CardFooter } from '@/components/ui/shadcn/card'
-import { Input } from '@/components/ui/shadcn/input'
 import { Pagination, PaginationContent, PaginationItem, PaginationLink, PaginationNext, PaginationPrevious } from '@/components/ui/shadcn/pagination'
 import { ScrollArea } from '@/components/ui/shadcn/scroll-area'
-import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from '@/components/ui/shadcn/select'
 import { Skeleton } from '@/components/ui/shadcn/skeleton'
 import { Table, TableBody, TableCell, TableHead, TableHeader, TableRow } from '@/components/ui/shadcn/table'
-
-/**
- * Hooks
- */
-import { EntityOrderBy, useAccountEntities } from '@/hooks/api/accounts/queries/useAccountEntities'
 
 /**
  * Types
@@ -57,69 +55,16 @@ type SearchFiltersProps = {
 
 function SearchFilters({ searchTerm, setSearchTerm, activeFilter, setActiveFilter, tAccount, tCommon }: SearchFiltersProps) {
   return (
-    <div className="grid grid-cols-1 gap-4 md:grid-cols-12">
-      <div className="relative md:col-span-8">
-        <SearchIcon className="absolute left-3 top-1/2 h-4 w-4 -translate-y-1/2 text-muted-foreground" />
-        <Input
-          placeholder={tAccount('entities.tk_filters-search-placeholder_')}
-          className={`border-0 pl-9 shadow-none transition-colors placeholder:text-muted-foreground ${
-            searchTerm ? 'bg-white ring-1 ring-slate-200' : 'bg-muted-foreground/5'
-          } focus-visible:bg-white focus-visible:ring-1 focus-visible:ring-slate-200`}
-          value={searchTerm}
-          onChange={(e) => setSearchTerm(e.target.value)}
-        />
-        {searchTerm && (
-          <button
-            type="button"
-            aria-label="Clear search"
-            className="absolute right-3 top-1/2 -translate-y-1/2 text-muted-foreground hover:text-foreground focus:outline-none"
-            onClick={() => setSearchTerm('')}
-          >
-            <svg xmlns="http://www.w3.org/2000/svg" width="16" height="16" fill="none" viewBox="0 0 24 24" stroke="currentColor" strokeWidth="2" className="h-4 w-4">
-              <path strokeLinecap="round" strokeLinejoin="round" d="M6 18L18 6M6 6l12 12" />
-            </svg>
-          </button>
-        )}
-      </div>
-
-      <div className="flex items-center gap-3 md:col-span-4">
-        <div className="relative flex-1">
-          <div className="absolute left-3 top-1/2 -translate-y-1/2">
-            <div className={`flex h-5 w-5 items-center justify-center rounded-full ${activeFilter === true ? 'bg-green-100' : activeFilter === false ? 'bg-gray-200' : 'bg-blue-100'}`}>
-              <span className={`h-2 w-2 rounded-full ${activeFilter === true ? 'bg-green-500' : activeFilter === false ? 'bg-gray-400' : 'bg-blue-500'}`}></span>
-            </div>
-          </div>
-          <Select
-            value={activeFilter === undefined ? 'all' : activeFilter.toString()}
-            onValueChange={(value) => {
-              if (value === 'all') setActiveFilter(undefined)
-              else setActiveFilter(value === 'true')
-            }}
-          >
-            <SelectTrigger
-              className={`border-0 pl-9 shadow-none transition-colors ${
-                activeFilter !== undefined
-                  ? 'bg-white ring-1 ring-slate-200 focus:bg-white focus:ring-1 focus:ring-slate-200'
-                  : 'bg-muted-foreground/5 hover:bg-white hover:ring-1 hover:ring-slate-200 focus:bg-muted-foreground/5 focus:ring-0'
-              }`}
-            >
-              <SelectValue placeholder={tCommon('filters.tk_status_')} />
-            </SelectTrigger>
-            <SelectContent>
-              <SelectItem value="all">
-                <span className="pr-2">{tCommon('status.tk_all_')}</span>
-              </SelectItem>
-              <SelectItem value="true">
-                <span className="pr-2">{tCommon('status.tk_active_')}</span>
-              </SelectItem>
-              <SelectItem value="false">
-                <span className="pr-2">{tCommon('status.tk_inactive_')}</span>
-              </SelectItem>
-            </SelectContent>
-          </Select>
-        </div>
-      </div>
-    </div>
+    <FiltersContainer>
+      <FilterGroup>
+        <Filter minWidth="400px">
+          <SearchFilter value={searchTerm} onChange={setSearchTerm} placeholder={tAccount('entities.tk_filters-search-placeholder_')} />
+        </Filter>
+        <Filter minWidth="200px">
+          <StatusFilter value={activeFilter} onChange={setActiveFilter} placeholder={tCommon('filters.tk_status_')} />
+        </Filter>
+      </FilterGroup>
+    </FiltersContainer>
   )
 }
 
@@ -136,26 +81,26 @@ type EntitiesTableProps = {
 function EntitiesTable({ entities, isLoading, tCommon, tAccount }: EntitiesTableProps) {
   if (isLoading) {
     return (
-      <TableBody>
+      <TableBody className="opacity-25">
         {Array.from({ length: 5 }).map((_, index) => (
           <TableRow key={index}>
             <TableCell>
               <div className="flex items-center gap-3">
-                <Skeleton className="h-10 w-10 rounded-full" />
+                <Skeleton className="skeleton-shimmer-orange h-10 w-10 rounded-full" />
                 <div className="space-y-2">
-                  <Skeleton className="h-4 w-[200px]" />
-                  <Skeleton className="h-3 w-[150px]" />
+                  <Skeleton className="skeleton-shimmer-orange h-4 w-[200px]" />
+                  <Skeleton className="skeleton-shimmer-orange h-3 w-[150px]" />
                 </div>
               </div>
             </TableCell>
             <TableCell>
-              <Skeleton className="h-4 w-[100px]" />
+              <Skeleton className="skeleton-shimmer-orange h-4 w-[100px]" />
             </TableCell>
             <TableCell>
-              <Skeleton className="h-4 w-[150px]" />
+              <Skeleton className="skeleton-shimmer-orange h-4 w-[150px]" />
             </TableCell>
             <TableCell>
-              <Skeleton className="h-4 w-[100px]" />
+              <Skeleton className="skeleton-shimmer-orange h-4 w-[100px]" />
             </TableCell>
           </TableRow>
         ))}
@@ -240,6 +185,8 @@ type TablePaginationProps = {
 function TablePagination({ currentPage, setCurrentPage, totalItems, pageSize }: TablePaginationProps) {
   const totalPages = Math.ceil(totalItems / pageSize)
 
+  if (totalPages <= 1) return null
+
   return (
     <Pagination>
       <PaginationContent>
@@ -296,6 +243,7 @@ export function AccountEntities() {
   const [currentPage, setCurrentPage] = useState(1)
   const [pageSize] = useState(10)
   const [isCreateDialogOpen, setIsCreateDialogOpen] = useState(false)
+  const { hasPermission } = useModuleAccess()
 
   // Debounce search input
   useEffect(() => {
@@ -342,10 +290,12 @@ export function AccountEntities() {
       <Card className="overflow-hidden border-none bg-gradient-to-br from-muted to-white">
         <CardContent className="flex justify-between gap-3 p-4">
           <SearchFilters searchTerm={searchInput} setSearchTerm={handleSearchChange} activeFilter={activeFilter} setActiveFilter={handleActiveFilterChange} tAccount={tAccount} tCommon={tCommon} />
-          <Button onClick={() => setIsCreateDialogOpen(true)}>
-            <Plus />
-            {tAccount('entities.tk_create-entity_')}
-          </Button>
+          {hasPermission('ENTITY_CREATION') && (
+            <Button onClick={() => setIsCreateDialogOpen(true)}>
+              <Plus />
+              {tAccount('entities.tk_create-entity_')}
+            </Button>
+          )}
         </CardContent>
       </Card>
 
@@ -388,7 +338,7 @@ export function AccountEntities() {
         )}
       </Card>
 
-      <CreateEntityDialog isOpen={isCreateDialogOpen} onOpenChange={setIsCreateDialogOpen} />
+      {hasPermission('ENTITY_CREATION') && <CreateEntityDialog isOpen={isCreateDialogOpen} onOpenChange={setIsCreateDialogOpen} />}
     </div>
   )
 }

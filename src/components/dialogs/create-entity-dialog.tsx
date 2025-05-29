@@ -9,6 +9,12 @@ import { useTranslation } from 'react-i18next'
 import { z } from 'zod'
 
 /**
+ * Dependencies
+ */
+import { useEntityCreate } from '@/hooks/api/entities/mutations/useEntityCreate'
+import { useModuleAccess } from '@/hooks/auth/useModuleAccess'
+
+/**
  * Components
  */
 import { Button } from '@/components/ui/shadcn/button'
@@ -19,10 +25,9 @@ import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from '@
 import { Textarea } from '@/components/ui/shadcn/textarea'
 
 /**
- * Hooks
+ * Types
  */
 import type { MeResponseDto } from '@/hooks/api/auth'
-import { useEntityCreate } from '@/hooks/api/entities/mutations/useEntityCreate'
 
 const formSchema = z.object({
   name: z.string().min(1, { message: 'Le nom est requis' }).max(100, { message: 'Le nom ne peut pas dépasser 100 caractères' }),
@@ -46,6 +51,7 @@ export function CreateEntityDialog({ isOpen, onOpenChange }: CreateEntityDialogP
   const queryClient = useQueryClient()
   const { t: tAccount } = useTranslation('account')
   const { t: tCommon } = useTranslation('common')
+  const { hasPermission } = useModuleAccess()
 
   // Get accountId from authMe
   const authMe = queryClient.getQueryData<MeResponseDto>(['authMe'])!
@@ -76,18 +82,16 @@ export function CreateEntityDialog({ isOpen, onOpenChange }: CreateEntityDialogP
         accountId: accountId as string
       })
 
-      // Invalider les requêtes pour rafraîchir les données
+      // Invalidate queries to refresh data
       await queryClient.invalidateQueries({ queryKey: ['account', accountId, 'entities'] })
-      // Réinitialiser le formulaire
       form.reset()
-      // Fermer le dialogue
       onOpenChange(false)
     } catch (error) {
       console.error('Failed to create entity:', error)
     }
   }
 
-  // Réinitialiser le formulaire quand le dialogue est fermé
+  // Reset form when dialog is closed
   const handleOpenChange = (open: boolean) => {
     if (!open) {
       form.reset()
@@ -104,100 +108,119 @@ export function CreateEntityDialog({ isOpen, onOpenChange }: CreateEntityDialogP
         </DialogHeader>
         <Form {...form}>
           <form onSubmit={form.handleSubmit(handleSubmit)} className="space-y-4">
-            <div className="space-y-4 rounded-md border p-4">
-              <h3 className="text-sm font-medium">{tAccount('entities.tk_entity-details_')}</h3>
-              <FormField
-                control={form.control}
-                name="name"
-                render={({ field }) => (
-                  <FormItem>
-                    <FormLabel>{tCommon('other.tk_name_')}</FormLabel>
-                    <FormControl>
-                      <Input {...field} />
-                    </FormControl>
-                    <FormMessage />
-                  </FormItem>
-                )}
-              />
-              <FormField
-                control={form.control}
-                name="description"
-                render={({ field }) => (
-                  <FormItem>
-                    <FormLabel>{tCommon('other.tk_description_')}</FormLabel>
-                    <FormControl>
-                      <Textarea {...field} />
-                    </FormControl>
-                    <FormMessage />
-                  </FormItem>
-                )}
-              />
-            </div>
-
-            <div className="space-y-4 rounded-md border p-4">
-              <h3 className="text-sm font-medium">{tAccount('organizations.tk_organization-details_')}</h3>
-              <FormField
-                control={form.control}
-                name="organization.name"
-                render={({ field }) => (
-                  <FormItem>
-                    <FormLabel>{tCommon('other.tk_name_')}</FormLabel>
-                    <FormControl>
-                      <Input {...field} />
-                    </FormControl>
-                    <FormMessage />
-                  </FormItem>
-                )}
-              />
-              <FormField
-                control={form.control}
-                name="organization.type"
-                render={({ field }) => (
-                  <FormItem>
-                    <FormLabel>{tCommon('other.tk_type_')}</FormLabel>
-                    <Select onValueChange={field.onChange} defaultValue={field.value}>
+            {hasPermission('ENTITY_CREATION') && (
+              <div className="space-y-4 rounded-md border p-4">
+                <h3 className="text-sm font-medium">{tAccount('entities.tk_entity-details_')}</h3>
+                <FormField
+                  control={form.control}
+                  name="name"
+                  render={({ field }) => (
+                    <FormItem>
+                      <FormLabel>{tCommon('other.tk_name_')}</FormLabel>
                       <FormControl>
-                        <SelectTrigger>
-                          <SelectValue placeholder={tCommon('other.tk_type_')} />
-                        </SelectTrigger>
+                        <Input {...field} />
                       </FormControl>
-                      <SelectContent>
-                        <SelectItem value="COMPANY">{tAccount('organizations.tk_type-company_')}</SelectItem>
-                        <SelectItem value="ASSOCIATION">{tAccount('organizations.tk_type-association_')}</SelectItem>
-                        <SelectItem value="COMMUNITY">{tAccount('organizations.tk_type-community_')}</SelectItem>
-                      </SelectContent>
-                    </Select>
-                    <FormMessage />
-                  </FormItem>
-                )}
-              />
-              <FormField
-                control={form.control}
-                name="organization.description"
-                render={({ field }) => (
-                  <FormItem>
-                    <FormLabel>{tCommon('other.tk_description_')}</FormLabel>
-                    <FormControl>
-                      <Textarea {...field} />
-                    </FormControl>
-                    <FormMessage />
-                  </FormItem>
-                )}
-              />
-              <FormField
-                control={form.control}
-                name="organization.website"
-                render={({ field }) => (
-                  <FormItem>
-                    <FormLabel>{tCommon('other.tk_website_')}</FormLabel>
-                    <FormControl>
-                      <Input {...field} type="url" />
-                    </FormControl>
-                    <FormMessage />
-                  </FormItem>
-                )}
-              />
-            </div>
+                      <FormMessage />
+                    </FormItem>
+                  )}
+                />
+                <FormField
+                  control={form.control}
+                  name="description"
+                  render={({ field }) => (
+                    <FormItem>
+                      <FormLabel>{tCommon('other.tk_description_')}</FormLabel>
+                      <FormControl>
+                        <Textarea {...field} />
+                      </FormControl>
+                      <FormMessage />
+                    </FormItem>
+                  )}
+                />
+              </div>
+            )}
+
+            {hasPermission('ORGANIZATION_CREATION') && (
+              <div className="space-y-4 rounded-md border p-4">
+                <h3 className="text-sm font-medium">{tAccount('organizations.tk_organization-details_')}</h3>
+                <FormField
+                  control={form.control}
+                  name="organization.name"
+                  render={({ field }) => (
+                    <FormItem>
+                      <FormLabel>{tCommon('other.tk_name_')}</FormLabel>
+                      <FormControl>
+                        <Input {...field} />
+                      </FormControl>
+                      <FormMessage />
+                    </FormItem>
+                  )}
+                />
+                <FormField
+                  control={form.control}
+                  name="organization.type"
+                  render={({ field }) => (
+                    <FormItem>
+                      <FormLabel>{tCommon('other.tk_type_')}</FormLabel>
+                      <Select onValueChange={field.onChange} defaultValue={field.value}>
+                        <FormControl>
+                          <SelectTrigger>
+                            <SelectValue placeholder={tCommon('other.tk_type_')} />
+                          </SelectTrigger>
+                        </FormControl>
+                        <SelectContent>
+                          <SelectItem
+                            value="COMPANY"
+                            className="cursor-pointer transition-colors hover:bg-muted data-[state=checked]:bg-primary/10 data-[state=checked]:font-semibold data-[state=checked]:text-primary"
+                          >
+                            {tAccount('organizations.tk_type-company_')}
+                          </SelectItem>
+                          <SelectItem
+                            value="ASSOCIATION"
+                            className="cursor-pointer transition-colors hover:bg-muted data-[state=checked]:bg-primary/10 data-[state=checked]:font-semibold data-[state=checked]:text-primary"
+                          >
+                            {tAccount('organizations.tk_type-association_')}
+                          </SelectItem>
+                          <SelectItem
+                            value="COMMUNITY"
+                            className="cursor-pointer transition-colors hover:bg-muted data-[state=checked]:bg-primary/10 data-[state=checked]:font-semibold data-[state=checked]:text-primary"
+                          >
+                            {tAccount('organizations.tk_type-community_')}
+                          </SelectItem>
+                        </SelectContent>
+                      </Select>
+                      <FormMessage />
+                    </FormItem>
+                  )}
+                />
+                <FormField
+                  control={form.control}
+                  name="organization.description"
+                  render={({ field }) => (
+                    <FormItem>
+                      <FormLabel>{tCommon('other.tk_description_')}</FormLabel>
+                      <FormControl>
+                        <Textarea {...field} />
+                      </FormControl>
+                      <FormMessage />
+                    </FormItem>
+                  )}
+                />
+                <FormField
+                  control={form.control}
+                  name="organization.website"
+                  render={({ field }) => (
+                    <FormItem>
+                      <FormLabel>{tCommon('other.tk_website_')}</FormLabel>
+                      <FormControl>
+                        <Input {...field} type="url" />
+                      </FormControl>
+                      <FormMessage />
+                    </FormItem>
+                  )}
+                />
+              </div>
+            )}
 
             <DialogFooter>
               <Button type="submit" disabled={createEntity.isLoading}>

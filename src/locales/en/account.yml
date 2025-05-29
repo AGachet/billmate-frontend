@@ -8,8 +8,6 @@ tabs:
   tk_users-description_: Manage your team members and their permissions
   tk_entities_: Entities
   tk_entities-description_: Manage your business entities and their settings
-  tk_roles_: Roles
-  tk_roles-description_: Configure and manage user roles and permissions
 
 overview:
   accountInfo:
@@ -44,10 +42,34 @@ overview:
 users:
   tk_title_: Account users
   tk_description_: Manage your team members and their permissions
-  tk_invite-new-user_: New user
+  tk_invite-new-user_: Invite user
   tk_invite-description_: Invite a new user to join your account or entities
   tk_filters-description_: Filter your users by status, role, entity, etc.
   tk_filters-search-placeholder_: Search users...
-  tk_direct-account-link_: Directly linked to the account
+  tk_direct-account-link_: Directly link the user to the current account
+  tk_direct-account-link-description_: This kind of user has access to all entities of this account
   tk_table-no-users_: No users found
-  tk_table-no-entities_: No entities
+  tk_pending-invitations_: Pending invitations
+
+entities:
+  tk_title_: Account Entities
+  tk_description_: Manage your business entities and their settings
+  tk_filters-description_: Filter your entities by status, name, etc.
+  tk_filters-search-placeholder_: Search entities...
+  tk_table-no-entities_: No entities found
+  tk_create-entity_: New entity
+  tk_create-entity-description_: Create a new entity to attach to your account
+  tk_entity-details_: Entity details
+
+organizations:
+  tk_organization-details_: Organization details
+  tk_type-company_: Company
+  tk_type-association_: Association
+  tk_type-community_: Community
+
+roles:
+  tk_title_: Account Roles
+  tk_description_: Manage your user roles and permissions
+  tk_filters-description_: Filter your roles by status, name, etc.
+  tk_filters-search-placeholder_: Search roles...
+  tk_table-no-roles_: No roles found

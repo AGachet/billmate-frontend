@@ -27,10 +27,7 @@ export const useSignInSchema = () => {
     confirmAccountToken: z.string().optional(),
     firstname: z.string().optional(),
     lastname: z.string().optional(),
-    locale: z
-      .string()
-      .optional()
-      .transform((val) => val?.toUpperCase())
+    locale: z.enum(['FR', 'EN']).default(navigator.language.split('-')[0].toUpperCase() as 'FR' | 'EN')
   })
 
   const response = z.object({

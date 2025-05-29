@@ -2,13 +2,19 @@
  * Ressources
  */
 import { useQueryClient } from '@tanstack/react-query'
-import { ArrowUpDown, Building2, Link, MailIcon, SearchIcon, ShieldCheck, UserPlus } from 'lucide-react'
+import { ArrowUpDown, Building2, Link, MailIcon, ShieldCheck, UserPlus } from 'lucide-react'
 import { useEffect, useState } from 'react'
 import { useTranslation } from 'react-i18next'
 
 /**
  * Dependencies
  */
+import { useInviteUser } from '@/hooks/api/accounts/mutations/useInviteUserCreate'
+import { useAccountEntities } from '@/hooks/api/accounts/queries/useAccountEntities'
+import { useAccountRoles } from '@/hooks/api/accounts/queries/useAccountRoles'
+import { useAccountUsers, UserOrderBy } from '@/hooks/api/accounts/queries/useAccountUsers'
+import { useInvitedUsers } from '@/hooks/api/invitations/queries/useInvitedUsers'
+import { useModuleAccess } from '@/hooks/auth/useModuleAccess'
 import { formatDate, getInitials } from '@/utils/format'
 
 /**
@@ -16,27 +22,19 @@ import { formatDate, getInitials } from '@/utils/format'
  */
 import { InviteUserDialog } from '@/components/dialogs/invite-user-dialog'
 import { Avatar } from '@/components/ui/custom/avatar'
+import { Filter, FilterGroup, FiltersContainer } from '@/components/ui/custom/filters-container'
 import { MultiSelectFilter, MultiSelectFilterItem } from '@/components/ui/custom/multiselect-filter'
+import { SearchFilter } from '@/components/ui/custom/search-filter'
+import { StatusFilter } from '@/components/ui/custom/status-filter'
 import { Badge } from '@/components/ui/shadcn/badge'
 import { Button } from '@/components/ui/shadcn/button'
 import { Card, CardContent, CardFooter } from '@/components/ui/shadcn/card'
-import { Input } from '@/components/ui/shadcn/input'
 import { Pagination, PaginationContent, PaginationItem, PaginationLink, PaginationNext, PaginationPrevious } from '@/components/ui/shadcn/pagination'
 import { ScrollArea } from '@/components/ui/shadcn/scroll-area'
-import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from '@/components/ui/shadcn/select'
 import { Skeleton } from '@/components/ui/shadcn/skeleton'
 import { Switch } from '@/components/ui/shadcn/switch'
 import { Table, TableBody, TableCell, TableHead, TableHeader, TableRow } from '@/components/ui/shadcn/table'
 import { Tooltip, TooltipContent, TooltipProvider, TooltipTrigger } from '@/components/ui/shadcn/tooltip'
-
-/**
- * Hooks
- */
-import { useInviteUser } from '@/hooks/api/accounts/mutations/useInviteUserCreate'
-import { useAccountEntities } from '@/hooks/api/accounts/queries/useAccountEntities'
-import { useAccountRoles } from '@/hooks/api/accounts/queries/useAccountRoles'
-import { useAccountUsers, UserOrderBy } from '@/hooks/api/accounts/queries/useAccountUsers'
-import { useInvitedUsers } from '@/hooks/api/invitations/queries/useInvitedUsers'
 
 /**
  * Types
@@ -197,62 +195,22 @@ function SearchFilters({
   accountId
 }: SearchFiltersProps) {
   return (
-    <div className="grid flex-1 grid-cols-1 gap-4 md:grid-cols-12">
-      <div className="relative md:col-span-3">
-        <SearchIcon className="absolute left-3 top-1/2 h-4 w-4 -translate-y-1/2 text-muted-foreground" />
-        <Input
-          placeholder={tAccount('users.tk_filters-search-placeholder_')}
-          className={`border-0 pl-9 shadow-none transition-colors placeholder:text-muted-foreground ${
-            searchTerm ? 'bg-white ring-1 ring-slate-200' : 'bg-muted-foreground/5'
-          } focus-visible:bg-white focus-visible:ring-1 focus-visible:ring-slate-200`}
-          value={searchTerm}
-          onChange={(e) => setSearchTerm(e.target.value)}
-        />
-        {searchTerm && (
-          <button
-            type="button"
-            aria-label="Clear search"
-            className="absolute right-3 top-1/2 -translate-y-1/2 text-muted-foreground hover:text-foreground focus:outline-none"
-            onClick={() => setSearchTerm('')}
-          >
-            <svg xmlns="http://www.w3.org/2000/svg" width="16" height="16" fill="none" viewBox="0 0 24 24" stroke="currentColor" strokeWidth="2" className="h-4 w-4">
-              <path strokeLinecap="round" strokeLinejoin="round" d="M6 18L18 6M6 6l12 12" />
-            </svg>
-          </button>
-        )}
-      </div>
-
-      <div className="flex items-center gap-3 md:col-span-9">
-        <div className="relative flex-1">
-          <div className="absolute left-3 top-1/2 -translate-y-1/2">
-            <div className={`flex h-5 w-5 items-center justify-center rounded-full ${activeFilter === true ? 'bg-green-100' : activeFilter === false ? 'bg-gray-200' : 'bg-blue-100'}`}>
-              <span className={`h-2 w-2 rounded-full ${activeFilter === true ? 'bg-green-500' : activeFilter === false ? 'bg-gray-400' : 'bg-blue-500'}`}></span>
-            </div>
-          </div>
-          <Select
-            value={activeFilter === undefined ? 'all' : activeFilter.toString()}
-            onValueChange={(value) => {
-              if (value === 'all') setActiveFilter(undefined)
-              else setActiveFilter(value === 'true')
-            }}
-          >
-            <SelectTrigger
-              className={`border-0 pl-9 shadow-none transition-colors ${
-                activeFilter !== undefined
-                  ? 'bg-white ring-1 ring-slate-200 focus:bg-white focus:ring-1 focus:ring-slate-200'
-                  : 'bg-muted-foreground/5 hover:bg-white hover:ring-1 hover:ring-slate-200 focus:bg-muted-foreground/5 focus:ring-0'
-              }`}
-            >
-              <SelectValue placeholder={tCommon('filters.tk_status_')} />
-            </SelectTrigger>
-            <SelectContent>
-              <SelectItem value="all">{tCommon('status.tk_all_')}</SelectItem>
-              <SelectItem value="true">{tCommon('status.tk_active_')}</SelectItem>
-              <SelectItem value="false">{tCommon('status.tk_inactive_')}</SelectItem>
-            </SelectContent>
-          </Select>
-        </div>
-
+    <FiltersContainer>
+      <FilterGroup>
+        <Filter minWidth="400px">
+          <SearchFilter value={searchTerm} onChange={setSearchTerm} placeholder={tAccount('users.tk_filters-search-placeholder_')} />
+        </Filter>
+        <Filter minWidth="200px">
+          <StatusFilter value={activeFilter} onChange={setActiveFilter} placeholder={tCommon('filters.tk_status_')} />
+        </Filter>
+        <Filter minWidth="250px">
+          <EntityFilter selectedEntities={selectedEntities} onEntitiesChange={onEntitiesChange} tAccount={tAccount} tCommon={tCommon} accountId={accountId} />
+        </Filter>
+        <Filter minWidth="250px">
+          <RoleFilter selectedRoles={selectedRoles} onRolesChange={onRolesChange} tAccount={tAccount} tCommon={tCommon} accountId={accountId} />
+        </Filter>
+      </FilterGroup>
+      <FilterGroup>
         <div
           className={`flex items-center gap-2 rounded-md border border-transparent px-3 py-2 transition-colors ${
             includeDirectUsers ? 'bg-white ring-1 ring-slate-200' : 'bg-muted-foreground/5 hover:bg-white hover:ring-1 hover:ring-slate-200'
@@ -261,11 +219,8 @@ function SearchFilters({
           <Switch checked={includeDirectUsers} onCheckedChange={setIncludeDirectUsers} className="data-[state=checked]:bg-primary" />
           <span className="text-sm text-muted-foreground">{tCommon('filters.tk_show-account-users_')}</span>
         </div>
-
-        <EntityFilter selectedEntities={selectedEntities} onEntitiesChange={onEntitiesChange} tAccount={tAccount} tCommon={tCommon} accountId={accountId} />
-        <RoleFilter selectedRoles={selectedRoles} onRolesChange={onRolesChange} tAccount={tAccount} tCommon={tCommon} accountId={accountId} />
-      </div>
-    </div>
+      </FilterGroup>
+    </FiltersContainer>
   )
 }
 
@@ -277,34 +232,35 @@ type UsersTableProps = {
   isLoading: boolean
   getFullName: (user: AccountUsersResponseDto['items'][0]) => string
   tCommon: (key: string) => string
+  tAccount: (key: string) => string
 }
 
-function UsersTable({ users, isLoading, getFullName, tCommon }: UsersTableProps) {
+function UsersTable({ users, isLoading, getFullName, tCommon, tAccount }: UsersTableProps) {
   if (isLoading) {
     return (
-      <TableBody>
+      <TableBody className="opacity-25">
         {Array.from({ length: 5 }).map((_, index) => (
           <TableRow key={index}>
             <TableCell>
               <div className="flex items-center gap-3">
-                <Skeleton className="h-10 w-10 rounded-full" />
+                <Skeleton className="skeleton-shimmer-orange h-10 w-10 rounded-full" />
                 <div className="space-y-2">
-                  <Skeleton className="h-4 w-[200px]" />
-                  <Skeleton className="h-3 w-[150px]" />
+                  <Skeleton className="skeleton-shimmer-orange h-4 w-[200px]" />
+                  <Skeleton className="skeleton-shimmer-orange h-3 w-[150px]" />
                 </div>
               </div>
             </TableCell>
             <TableCell>
-              <Skeleton className="h-4 w-[100px]" />
+              <Skeleton className="skeleton-shimmer-orange h-4 w-[100px]" />
             </TableCell>
             <TableCell>
-              <Skeleton className="h-4 w-[150px]" />
+              <Skeleton className="skeleton-shimmer-orange h-4 w-[150px]" />
             </TableCell>
             <TableCell>
-              <Skeleton className="h-4 w-[100px]" />
+              <Skeleton className="skeleton-shimmer-orange h-4 w-[100px]" />
             </TableCell>
             <TableCell>
-              <Skeleton className="h-4 w-[100px]" />
+              <Skeleton className="skeleton-shimmer-orange h-4 w-[100px]" />
             </TableCell>
           </TableRow>
         ))}
@@ -323,7 +279,14 @@ function UsersTable({ users, isLoading, getFullName, tCommon }: UsersTableProps)
               <div>
                 <div className="flex items-center gap-1 font-medium">
                   {getFullName(user)}
-                  {user.isDirectlyLinked && <Link className="h-3 w-3 text-muted-foreground" />}
+                  {user.isDirectlyLinked && (
+                    <Tooltip>
+                      <TooltipTrigger asChild>
+                        <Link className="h-3 w-3 cursor-pointer text-muted-foreground" />
+                      </TooltipTrigger>
+                      <TooltipContent>{tAccount('users.tk_direct-account-link-description_')}</TooltipContent>
+                    </Tooltip>
+                  )}
                 </div>
                 <div className="text-sm text-muted-foreground">{user.email}</div>
               </div>
@@ -388,6 +351,8 @@ type TablePaginationProps = {
 
 function TablePagination({ currentPage, setCurrentPage, totalItems, pageSize }: TablePaginationProps) {
   const totalPages = Math.ceil(totalItems / pageSize)
+
+  if (totalPages <= 1) return null
 
   return (
     <Pagination>
@@ -539,6 +504,7 @@ export function AccountUsers() {
   const [pageSize] = useState(10)
   const [isInviteDialogOpen, setIsInviteDialogOpen] = useState(false)
   const [includeDirectUsers, setIncludeDirectUsers] = useState(true)
+  const { hasPermission } = useModuleAccess()
 
   // Debounce search input
   useEffect(() => {
@@ -622,10 +588,12 @@ export function AccountUsers() {
             tCommon={tCommon}
             accountId={accountId as string}
           />
-          <Button onClick={() => setIsInviteDialogOpen(true)}>
-            <UserPlus />
-            {tAccount('users.tk_invite-new-user_')}
-          </Button>
+          {(hasPermission('USER_ACCOUNTS_INVITATION') || hasPermission('USER_ENTITIES_INVITATION')) && (
+            <Button onClick={() => setIsInviteDialogOpen(true)}>
+              <UserPlus />
+              {tAccount('users.tk_invite-new-user_')}
+            </Button>
+          )}
           <InvitationsBadge />
         </CardContent>
       </Card>
@@ -659,7 +627,7 @@ export function AccountUsers() {
                   </TableHead>
                 </TableRow>
               </TableHeader>
-              <UsersTable users={usersData?.items || []} isLoading={isLoading} getFullName={getFullName} tCommon={tCommon} />
+              <UsersTable users={usersData?.items || []} isLoading={isLoading} getFullName={getFullName} tCommon={tCommon} tAccount={tAccount} />
             </Table>
           </ScrollArea>
         </CardContent>
@@ -668,7 +636,7 @@ export function AccountUsers() {
         </CardFooter>
       </Card>
 
-      <InviteUserDialog isOpen={isInviteDialogOpen} onOpenChange={setIsInviteDialogOpen} />
+      {(hasPermission('USER_ACCOUNTS_INVITATION') || hasPermission('USER_ENTITIES_INVITATION')) && <InviteUserDialog isOpen={isInviteDialogOpen} onOpenChange={setIsInviteDialogOpen} />}
     </div>
   )
 }

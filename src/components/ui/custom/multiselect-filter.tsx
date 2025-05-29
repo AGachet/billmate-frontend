@@ -109,10 +109,10 @@ export function MultiSelectFilter({
             )}
           </div>
           {loading ? (
-            <div className="flex flex-col gap-2 p-2">
-              <Skeleton className="h-6 w-full rounded" />
-              <Skeleton className="h-6 w-3/4 rounded" />
-              <Skeleton className="h-6 w-2/3 rounded" />
+            <div className="flex flex-col gap-2 p-2 opacity-25">
+              <Skeleton className="skeleton-shimmer-orange h-6 w-full rounded" />
+              <Skeleton className="skeleton-shimmer-orange h-6 w-3/4 rounded" />
+              <Skeleton className="skeleton-shimmer-orange h-6 w-2/3 rounded" />
             </div>
           ) : displayItems.length === 0 ? (
             <div className="flex h-[70px] items-center justify-center text-sm text-muted-foreground">{emptyText}</div>

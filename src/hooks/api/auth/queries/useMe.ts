@@ -26,10 +26,16 @@ export const useMeSchema = () => {
     name: z.string()
   })
 
+  const peopleSchema = z.object({
+    firstname: z.string().nullable(),
+    lastname: z.string().nullable()
+  })
+
   const entitySchema = z.object({
     id: z.string(),
     name: z.string(),
     isActive: z.boolean(),
+    accountId: z.string(),
     organization: organizationSchema.nullable()
   })
 
@@ -37,8 +43,7 @@ export const useMeSchema = () => {
     .object({
       userId: z.string(),
       email: z.string(),
-      firstname: z.string().nullable(),
-      lastname: z.string().nullable(),
+      people: peopleSchema,
       roles: z.array(z.string()).nonempty(),
       modules: z.array(z.string()).nonempty(),
       permissions: z.array(z.string()).nonempty(),

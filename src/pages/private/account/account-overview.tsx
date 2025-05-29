@@ -191,7 +191,7 @@ type RecentUsersProps = {
 function RecentUsers({ users, tAccount }: RecentUsersProps) {
   const formattedUsers: RecentListItem[] = users.map((user) => ({
     id: user.id,
-    name: `${user.people?.firstname} ${user.people?.lastname}`,
+    name: `${user.people?.firstname ?? ''} ${user.people?.lastname ?? ''}`,
     subtitle: user.email,
     createdAt: user.createdAt,
     initials: getInitials(user.people?.firstname ?? '', user.people?.lastname ?? ''),
@@ -282,7 +282,7 @@ export function AccountOverview() {
   // Get accountId from authMe
   const authMe = queryClient.getQueryData<MeResponseDto>(['authMe'])!
   const activeAccount = authMe.accounts.find((acc) => acc.isActive)
-  const accountId = activeAccount?.id
+  const accountId = activeAccount?.id ?? authMe.entities.find((entity) => entity.isActive)?.accountId
 
   // Fetch account data
   const { data: account, isLoading, error } = useAccount(accountId as string)
