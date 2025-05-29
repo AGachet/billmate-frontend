@@ -13,6 +13,7 @@ import apiClient from '@/lib/api/client'
 
 // Translation
 const tAuth = (key: string) => i18next.t(key, { ns: 'auth' })
+const tCommon = (key: string) => i18next.t(key, { ns: 'common' })
 
 /**
  * Schemas & DTOs
@@ -26,7 +27,7 @@ export const useAcceptUserInvitationSchema = () => {
     locale: z
       .string()
       .optional()
-      .transform((val) => val?.toUpperCase())
+      .refine((val) => !val || /^[A-Z]{2}$/.test(val), { message: tCommon('fields.tk_localeError_') })
   })
 
   const response = z.object({
@@ -51,8 +52,14 @@ export const useAcceptUserInvitation = () => {
       // Schema validation
       schemas.payload.parse(data)
 
+      // Add locale only if not provided
+      const payload = {
+        ...data,
+        locale: data.locale || navigator.language.split('-')[0].toUpperCase()
+      }
+
       // Send data to the API
-      const response = await apiClient.post<AcceptUserInvitationResponseDto>('/invitations/accept', data)
+      const response = await apiClient.post<AcceptUserInvitationResponseDto>('/invitations/accept', payload)
       return schemas.response.parse(response)
     },
     onSuccess: async () => {

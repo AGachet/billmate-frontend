@@ -414,8 +414,7 @@ function InvitationsBadge() {
         email: invitation.inviteeUserEmail,
         roleIds: invitation.roles.map((role) => role.id),
         accountIds: invitation.accounts.map((account) => account.id),
-        entityIds: invitation.entities.map((entity) => entity.id),
-        locale: navigator.language.split('-')[0].toUpperCase() as 'FR' | 'EN'
+        entityIds: invitation.entities.map((entity) => entity.id)
       })
       queryClient.invalidateQueries({ queryKey: ['invitations'] })
     } catch (error) {
