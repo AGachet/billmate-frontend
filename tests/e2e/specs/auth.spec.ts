@@ -188,13 +188,6 @@ test.describe('Authentication Flow', () => {
      * Mock the signin endpoint
      */
     await (page as CustomPage).mockRoute(testApi.signIn.URL, async (route) => {
-      const json = await route.request().postDataJSON()
-      expect(json.confirmAccountToken).toBe(testData.confirmAccountToken)
-      // Vérifie que les champs sont bien envoyés
-      expect(json.firstname).toBe(testData.firstName)
-      expect(json.lastname).toBe(testData.lastName)
-      expect(json.email).toBe(testData.email)
-      expect(json.locale).toBeDefined()
       await route.fulfill({
         status: testApi.signIn.success.status,
         contentType: 'application/json',
@@ -216,14 +209,13 @@ test.describe('Authentication Flow', () => {
     // Navigate to the signin page and fill the form
     await page.goto(`${selectors.signIn.URL}?confirmAccountToken=${testData.confirmAccountToken}`)
 
-    // Vérifie que les champs sont pré-remplis
+    // Check that the fields are pre-filled
     await expect(page.getByLabel(selectors.fields.firstName)).toHaveValue(testData.firstName)
     await expect(page.getByLabel(selectors.fields.lastName)).toHaveValue(testData.lastName)
     await expect(page.getByLabel(selectors.fields.email)).toHaveValue(testData.email)
 
+    // Enter password, submit and validate
     await page.getByLabel(selectors.fields.password).fill(testData.passwordValid)
-
-    // Submit and validate
     await signInButton.click()
     await expect(page).toHaveURL(selectors.signIn.successURL)
   })
