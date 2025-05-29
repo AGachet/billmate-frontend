@@ -50,8 +50,7 @@ export function UserInvitation() {
       invitationToken: invitationToken || '',
       password: '',
       firstname: '',
-      lastname: '',
-      locale: navigator.language.split('-')[0]
+      lastname: ''
     }
   })
 

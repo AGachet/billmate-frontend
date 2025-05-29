@@ -13,6 +13,7 @@ import apiClient from '@/lib/api/client'
 
 // Translation
 const tAuth = (key: string) => i18next.t(key, { ns: 'auth' })
+const tCommon = (key: string) => i18next.t(key, { ns: 'common' })
 
 /**
  * Schemas & DTOs
@@ -27,7 +28,10 @@ export const useSignInSchema = () => {
     confirmAccountToken: z.string().optional(),
     firstname: z.string().optional(),
     lastname: z.string().optional(),
-    locale: z.enum(['FR', 'EN']).default(navigator.language.split('-')[0].toUpperCase() as 'FR' | 'EN')
+    locale: z
+      .string()
+      .optional()
+      .refine((val) => !val || /^[A-Z]{2}$/.test(val), { message: tCommon('fields.tk_localeError_') })
   })
 
   const response = z.object({
@@ -52,8 +56,14 @@ export const useSignIn = () => {
       // Schema validation
       schemas.payload.parse(data)
 
+      // Add locale only if not provided
+      const payload = {
+        ...data,
+        locale: data.locale || navigator.language.split('-')[0].toUpperCase()
+      }
+
       // Send data to the API
-      const response = await apiClient.post<SignInResponseDto>('/auth/signin', data)
+      const response = await apiClient.post<SignInResponseDto>('/auth/signin', payload)
       return schemas.response.parse(response)
     },
     onSuccess: async () => {

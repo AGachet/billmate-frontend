@@ -12,6 +12,7 @@ import apiClient from '@/lib/api/client'
 
 // Translation
 const tAccounts = (key: string) => i18next.t(key, { ns: 'accounts' })
+const tCommon = (key: string) => i18next.t(key, { ns: 'common' })
 
 /**
  * Schemas & DTOs
@@ -28,7 +29,10 @@ export const useInviteUserSchema = () => {
     roleIds: z.array(z.number()).optional(),
     accountIds: z.array(z.string()).optional(),
     entityIds: z.array(z.string()).optional(),
-    locale: z.enum(['FR', 'EN']).default(navigator.language.split('-')[0].toUpperCase() as 'FR' | 'EN')
+    locale: z
+      .string()
+      .optional()
+      .refine((val) => !val || /^[A-Z]{2}$/.test(val), { message: tCommon('fields.tk_localeError_') })
   })
 
   const response = z.object({
@@ -56,8 +60,14 @@ export const useInviteUser = () => {
       // Schema validation
       schemas.payload.parse(data)
 
+      // Add locale only if not provided
+      const payload = {
+        ...data,
+        locale: data.locale || navigator.language.split('-')[0].toUpperCase()
+      }
+
       // Send data to the API
-      const response = await apiClient.post<InviteUserResponseDto>('/invitations', data)
+      const response = await apiClient.post<InviteUserResponseDto>('/invitations', payload)
       return schemas.response.parse(response)
     },
     onError: (error) => {
