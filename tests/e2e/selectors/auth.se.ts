@@ -48,9 +48,11 @@ const testApi = {
       status: 200,
       body: {
         userId: testData.userId,
-        firstname: 'Bill',
-        lastname: 'Mate',
         email: 'bill.mate@diamondforge.fr',
+        people: {
+          firstname: 'Bill',
+          lastname: 'Mate'
+        },
         roles: ['admin'],
         modules: ['ACCOUNT_ADMINISTRATION', 'ORGANIZATION_ADMINISTRATION', 'USER_ACCOUNT_PASSWORD_RECOVERY'],
         permissions: [
@@ -66,6 +68,26 @@ const testApi = {
           'ENTITY_USER_MANAGEMENT',
           'ORGANIZATION_CREATION',
           'ORGANIZATION_UPDATE'
+        ],
+        accounts: [
+          {
+            id: 'acc-123e4567-e89b-12d3-a456-426614174000',
+            name: 'BillMate Account',
+            description: 'Default account for testing',
+            isActive: true
+          }
+        ],
+        entities: [
+          {
+            id: 'ent-123e4567-e89b-12d3-a456-426614174000',
+            name: 'Test Entity',
+            isActive: true,
+            accountId: 'acc-123e4567-e89b-12d3-a456-426614174000',
+            organization: {
+              id: 'org-123e4567-e89b-12d3-a456-426614174000',
+              name: 'Test Organization'
+            }
+          }
         ],
         createdAt: new Date().toISOString()
       }
