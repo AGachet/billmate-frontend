@@ -1,10 +1,15 @@
 /**
- * Dependencies
+ * Resources
  */
-import { useBreadcrumb } from '@/hooks/ui/useBreadcrumb'
 import { useEffect } from 'react'
 import { useTranslation } from 'react-i18next'
 import { useNavigate, useSearchParams } from 'react-router-dom'
+
+/**
+ * Dependencies
+ */
+import { useModuleAccess } from '@/hooks/auth/useModuleAccess'
+import { useBreadcrumb } from '@/hooks/ui/useBreadcrumb'
 
 /**
  * Components
@@ -23,6 +28,7 @@ export function AccountManagement() {
   const { setBreadcrumb } = useBreadcrumb()
   const navigate = useNavigate()
   const currentTab = searchParams.get('tab') || 'overview'
+  const { hasPermission } = useModuleAccess()
 
   useEffect(() => {
     setBreadcrumb([
@@ -50,24 +56,36 @@ export function AccountManagement() {
     <div className="container mx-auto">
       <Tabs value={currentTab} onValueChange={handleTabChange} className="space-y-4">
         <TabsList className="flex h-10 w-full justify-between space-x-1 rounded-md bg-muted">
-          {['overview', 'entities', 'users'].map((tab) => (
-            <TabsTrigger key={tab} value={tab} className={tabTriggerClass}>
-              {tAccount(`tabs.tk_${tab}_`)}
+          <TabsTrigger value="overview" className={tabTriggerClass}>
+            {tAccount(`tabs.tk_overview_`)}
+          </TabsTrigger>
+          {hasPermission('ACCOUNT_ENTITY_MANAGEMENT') && (
+            <TabsTrigger value="entities" className={tabTriggerClass}>
+              {tAccount(`tabs.tk_entities_`)}
             </TabsTrigger>
-          ))}
+          )}
+          {hasPermission('ACCOUNT_USER_MANAGEMENT') && (
+            <TabsTrigger value="users" className={tabTriggerClass}>
+              {tAccount(`tabs.tk_users_`)}
+            </TabsTrigger>
+          )}
         </TabsList>
 
         <TabsContent value="overview">
           <AccountOverview />
         </TabsContent>
 
-        <TabsContent value="users">
-          <AccountUsers />
-        </TabsContent>
+        {hasPermission('ACCOUNT_USER_MANAGEMENT') && (
+          <TabsContent value="users">
+            <AccountUsers />
+          </TabsContent>
+        )}
 
-        <TabsContent value="entities">
-          <AccountEntities />
-        </TabsContent>
+        {hasPermission('ACCOUNT_ENTITY_MANAGEMENT') && (
+          <TabsContent value="entities">
+            <AccountEntities />
+          </TabsContent>
+        )}
       </Tabs>
     </div>
   )

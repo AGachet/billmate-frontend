@@ -9,7 +9,7 @@ import { z } from 'zod'
 /**
  * Dependencies
  */
-import { useGuest } from '@/hooks/api/auth'
+import { useGuest } from '@/hooks/api/auth/queries/useGuest'
 import apiClient from '@/lib/api/client'
 
 // Translation
@@ -46,12 +46,16 @@ export const useSignOut = () => {
   const guest = useGuest()
   const schemas = useSignOutSchema()
 
-  // Get user data from cache
-  const me = queryClient.getQueryData<MeResponseDto>(['authMe'])
-  if (!me?.userId) throw new Error('User not found in cache')
+  // Get user data from cache or localStorage
+  const me = queryClient.getQueryData<MeResponseDto>(['authMe']) || JSON.parse(localStorage.getItem('authMe') || '{}')
 
   const mutation = useMutation({
     mutationFn: async () => {
+      if (!me?.userId) {
+        // If no user data is available, just clear the cache and redirect
+        return { message: 'User already signed out' }
+      }
+
       // Schema validation
       const payload: SignOutPayloadDto = {
         userId: me.userId

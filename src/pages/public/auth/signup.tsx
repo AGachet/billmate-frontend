@@ -9,6 +9,7 @@ import { useTranslation } from 'react-i18next'
 /**
  * Components
  */
+import { Logo } from '@/components/ui/custom/logo'
 import { Alert, AlertDescription } from '@/components/ui/shadcn/alert'
 import { Button } from '@/components/ui/shadcn/button'
 import { Card, CardContent, CardDescription, CardFooter, CardHeader, CardTitle } from '@/components/ui/shadcn/card'
@@ -145,7 +146,8 @@ export function SignUp() {
   }
 
   return (
-    <div className="flex h-screen items-center justify-center bg-gray-50">
+    <div className="flex h-screen flex-col items-center bg-gray-50">
+      <Logo isLong className="max-w-xs px-4 py-20" />
       <div className="w-full max-w-md space-y-8 rounded-lg bg-white p-8 shadow-md">
         <div className="text-center">
           <h2 className="text-3xl font-bold tracking-tight text-gray-900">{tAuth('signup.tk_title_')}</h2>
