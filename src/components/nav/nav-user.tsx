@@ -1,9 +1,15 @@
 /**
+ * Resources
+ */
+import { BadgeCheck, Bell, ChevronsUpDown, LogOut, Sparkles } from 'lucide-react'
+
+/**
  * Dependencies
  */
 import { useSignOut } from '@/hooks/api/auth/mutations/useSignOut'
 import { useMe } from '@/hooks/api/auth/queries/useMe'
 import { useModuleAccess } from '@/hooks/auth/useModuleAccess'
+import { getInitials } from '@/utils/format'
 import { useTranslation } from 'react-i18next'
 import { Link } from 'react-router-dom'
 
@@ -15,11 +21,6 @@ import { DropdownMenu, DropdownMenuContent, DropdownMenuGroup, DropdownMenuItem,
 import { SidebarMenu, SidebarMenuButton, SidebarMenuItem, useSidebar } from '@/components/ui/shadcn/sidebar'
 
 /**
- * Icons
- */
-import { BadgeCheck, Bell, ChevronsUpDown, LogOut, Sparkles } from 'lucide-react'
-
-/**
  * React declaration
  */
 export function NavUser() {
@@ -29,10 +30,10 @@ export function NavUser() {
   const { t: tNav } = useTranslation('nav')
   const { hasModuleAccess } = useModuleAccess()
 
-  if (!user) return null
+  if (!user || !user.people) return null
 
   const userName = `${user.people.firstname || ''} ${user.people.lastname || ''}`
-  const initials = `${user.people.firstname?.[0]?.toUpperCase() || ''}${user.people.lastname?.[0]?.toUpperCase() || ''}`
+  const initials = getInitials(user.people.firstname, user.people.lastname)
 
   const renderUserInfo = () => (
     <div className="flex items-center gap-2 px-1 py-1.5 text-left text-sm">

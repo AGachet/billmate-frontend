@@ -89,6 +89,7 @@ function EntityFilter({ selectedEntities, onEntitiesChange, tAccount, tCommon, a
 
   return (
     <MultiSelectFilter
+      dataTestid="entities-filter"
       selected={selectedEntities}
       onChange={handleChange}
       items={items}
@@ -144,6 +145,7 @@ function RoleFilter({ selectedRoles, onRolesChange, tAccount, tCommon, accountId
 
   return (
     <MultiSelectFilter
+      dataTestid="roles-filter"
       selected={selectedRoles}
       onChange={handleChange}
       items={items}
@@ -212,6 +214,7 @@ function SearchFilters({
       </FilterGroup>
       <FilterGroup>
         <div
+          data-testid="direct-users-switch-filter"
           className={`flex items-center gap-2 rounded-md border border-transparent px-3 py-2 transition-colors ${
             includeDirectUsers ? 'bg-white ring-1 ring-slate-200' : 'bg-muted-foreground/5 hover:bg-white hover:ring-1 hover:ring-slate-200'
           }`}
