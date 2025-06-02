@@ -42,7 +42,11 @@ const LayoutLoggedContent = () => {
         <Separator orientation="vertical" className="mr-2 h-4" />
         <Breadcrumb>{renderBreadcrumbItems()}</Breadcrumb>
       </div>
-      {items.length > 0 && items[items.length - 1].description && <div className="ml-4 text-sm text-muted-foreground">{items[items.length - 1].description}</div>}
+      {items.length > 0 && items[items.length - 1].description && (
+        <div data-testid="page-description" className="ml-4 text-sm text-muted-foreground">
+          {items[items.length - 1].description}
+        </div>
+      )}
     </header>
   )
 
