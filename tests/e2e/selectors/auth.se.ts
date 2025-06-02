@@ -42,7 +42,7 @@ const testApi = {
       body: { message: 'User signed out successfully' }
     }
   },
-  me: {
+  meAdmin: {
     URL: '**/auth/me',
     success: {
       status: 200,
@@ -72,7 +72,7 @@ const testApi = {
         accounts: [
           {
             id: 'acc-123e4567-e89b-12d3-a456-426614174000',
-            name: 'BillMate Account',
+            name: 'Main account',
             description: 'Default account for testing',
             isActive: true
           }
@@ -90,6 +90,23 @@ const testApi = {
           }
         ],
         createdAt: new Date().toISOString()
+      }
+    }
+  },
+  meUser: {
+    URL: '**/auth/me',
+    success: {
+      status: 200,
+      body: {
+        userId: testData.userId,
+        email: 'bill.mate@diamondforge.fr',
+        people: {
+          firstname: 'Bill',
+          lastname: 'Mate'
+        },
+        roles: ['user'],
+        modules: ['USER_ACCOUNT_PASSWORD_RECOVERY'],
+        permissions: ['PASSWORD_RECOVERY_LINK_REQUEST_OWN', 'PASSWORD_RECOVERY_RESET_OWN']
       }
     }
   },
@@ -136,6 +153,7 @@ const selectors = {
     URL: '/dashboard',
     cta: {
       userMenu: { name: /Bill Mate/i },
+      account: { name: /Account management/i },
       signOut: { name: /Sign out/i }
     }
   },

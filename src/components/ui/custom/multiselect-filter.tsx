@@ -15,6 +15,7 @@ type MultiSelectFilterProps = {
   onChange: (selected: (string | number)[]) => void
   items: MultiSelectFilterItem[]
   icon?: React.ReactNode
+  dataTestid?: string
   placeholder: string
   selectedLabel: string
   badgeBg?: string
@@ -32,6 +33,7 @@ export function MultiSelectFilter({
   items,
   icon,
   placeholder,
+  dataTestid,
   selectedLabel,
   badgeBg = '',
   badgeText = '',
@@ -63,6 +65,7 @@ export function MultiSelectFilter({
     <Popover open={open} onOpenChange={setOpen}>
       <PopoverTrigger asChild>
         <Button
+          data-testid={dataTestid}
           variant="outline"
           role="combobox"
           aria-expanded={open}

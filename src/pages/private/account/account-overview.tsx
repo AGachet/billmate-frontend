@@ -159,19 +159,19 @@ function StatisticsCards({ account, tCommon }: StatisticsCardsProps) {
   return (
     <div className="flex h-full w-full gap-2">
       {/* Users */}
-      <div className="flex flex-1 flex-col items-center justify-center gap-2 rounded-md border border-muted bg-muted/50 p-8">
+      <div aria-label="Users-count" className="flex flex-1 flex-col items-center justify-center gap-2 rounded-md border border-muted bg-muted/50 p-8">
         <Avatar icon={<Users size={24} />} bgColor={ICON_BG.users} textColor="text-[#3B82F6]" size="lg" />
         <span className="text-2xl font-bold">{account.users.count}</span>
         <span className="text-sm text-muted-foreground">{tCommon('items.tk_users_')}</span>
       </div>
       {/* Entities */}
-      <div className="flex flex-1 flex-col items-center justify-center gap-2 rounded-md border border-muted bg-muted/50 p-8">
+      <div aria-label="Entities-count" className="flex flex-1 flex-col items-center justify-center gap-2 rounded-md border border-muted bg-muted/50 p-8">
         <Avatar icon={<Building2 size={24} />} bgColor={ICON_BG.entities} textColor="text-[#A259FF]" size="lg" />
         <span className="text-2xl font-bold">{account.entities.count}</span>
         <span className="text-sm text-muted-foreground">{tCommon('items.tk_entities_')}</span>
       </div>
       {/* Roles */}
-      <div className="flex flex-1 flex-col items-center justify-center gap-2 rounded-md border border-muted bg-muted/50 p-8">
+      <div aria-label="Roles-count" className="flex flex-1 flex-col items-center justify-center gap-2 rounded-md border border-muted bg-muted/50 p-8">
         <Avatar icon={<ShieldCheck size={24} />} bgColor={ICON_BG.roles} textColor="text-[#FBBF24]" size="lg" />
         <span className="text-2xl font-bold">{account.roles.count}</span>
         <span className="text-sm text-muted-foreground">{tCommon('items.tk_roles_')}</span>
@@ -323,7 +323,7 @@ export function AccountOverview() {
     <div className="space-y-4">
       <div className="grid gap-4 md:grid-cols-2 lg:grid-cols-2">
         {/* Account Information */}
-        <Card>
+        <Card data-testid="account-info-section">
           <CardHeader>
             <SectionHeader title={tAccount('overview.accountInfo.tk_title_')} description={tAccount('overview.accountInfo.tk_description_')} />
           </CardHeader>
@@ -333,7 +333,7 @@ export function AccountOverview() {
         </Card>
 
         {/* Statistics */}
-        <Card className="flex flex-col">
+        <Card className="flex flex-col" data-testid="statistics-section">
           <CardHeader>
             <SectionHeader title={tAccount('overview.statistics.tk_title_')} description={tAccount('overview.statistics.tk_description_')} />
           </CardHeader>
@@ -346,7 +346,7 @@ export function AccountOverview() {
       {/* Lists */}
       <div className="grid gap-4 md:grid-cols-2 lg:grid-cols-2">
         {/* Recent Users */}
-        <Card className="flex flex-col">
+        <Card className="flex flex-col" data-testid="recent-users-section">
           <CardHeader>
             <SectionHeader icon={ICONS.users} iconBg={ICON_BG.users} title={tAccount('overview.recentUsers.tk_title_')} description={tAccount('overview.recentUsers.tk_description_')} />
           </CardHeader>
@@ -356,7 +356,7 @@ export function AccountOverview() {
         </Card>
 
         {/* Recent Entities */}
-        <Card className="flex flex-col">
+        <Card className="flex flex-col" data-testid="recent-entities-section">
           <CardHeader>
             <SectionHeader icon={ICONS.entities} iconBg={ICON_BG.entities} title={tAccount('overview.recentEntities.tk_title_')} description={tAccount('overview.recentEntities.tk_description_')} />
           </CardHeader>
@@ -367,7 +367,7 @@ export function AccountOverview() {
       </div>
 
       {/* Available Roles */}
-      <Card>
+      <Card data-testid="recent-roles-section">
         <CardHeader>
           <SectionHeader icon={ICONS.roles} iconBg={ICON_BG.roles} title={tAccount('overview.recentRoles.tk_title_')} description={tAccount('overview.recentRoles.tk_description_')} />
         </CardHeader>

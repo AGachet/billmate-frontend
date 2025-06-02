@@ -198,11 +198,11 @@ test.describe('Authentication Flow', () => {
     /**
      * Mock the user endpoint
      */
-    await (page as CustomPage).mockRoute(testApi.me.URL, async (route) => {
+    await (page as CustomPage).mockRoute(testApi.meAdmin.URL, async (route) => {
       await route.fulfill({
-        status: testApi.me.success.status,
+        status: testApi.meAdmin.success.status,
         contentType: 'application/json',
-        body: JSON.stringify(testApi.me.success.body)
+        body: JSON.stringify(testApi.meAdmin.success.body)
       })
     })
 
@@ -224,11 +224,11 @@ test.describe('Authentication Flow', () => {
     /**
      * Mock the user endpoint
      */
-    await (page as CustomPage).mockRoute(testApi.me.URL, async (route) => {
+    await (page as CustomPage).mockRoute(testApi.meAdmin.URL, async (route) => {
       await route.fulfill({
-        status: testApi.me.success.status,
+        status: testApi.meAdmin.success.status,
         contentType: 'application/json',
-        body: JSON.stringify(testApi.me.success.body)
+        body: JSON.stringify(testApi.meAdmin.success.body)
       })
     })
 
@@ -245,13 +245,13 @@ test.describe('Authentication Flow', () => {
      */
     await page.evaluate((userData) => {
       localStorage.setItem('authMe', JSON.stringify(userData))
-    }, testApi.me.success.body)
+    }, testApi.meAdmin.success.body)
 
     // Navigate to the dashboard
     await page.goto(selectors.dashboard.URL)
 
     // Verify that the user is logged in
-    await expect(page.getByText(testApi.me.success.body.email)).toBeVisible()
+    await expect(page.getByText(testApi.meAdmin.success.body.email)).toBeVisible()
 
     // Click on the user menu and sign out
     await page.getByRole('button', selectors.dashboard.cta.userMenu).click()
