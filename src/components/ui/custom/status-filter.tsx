@@ -9,7 +9,7 @@ type StatusFilterProps = {
 
 export function StatusFilter({ value, onChange, placeholder, className = '' }: StatusFilterProps) {
   return (
-    <div className={`relative ${className}`}>
+    <div data-testid="status-filter" className={`relative ${className}`}>
       <div className="absolute left-5 top-1/2 -translate-y-1/2">
         <div className={`flex h-5 w-5 items-center justify-center rounded-full ${value === true ? 'bg-green-100' : value === false ? 'bg-gray-200' : 'bg-blue-100'}`}>
           <span className={`h-2 w-2 rounded-full ${value === true ? 'bg-green-500' : value === false ? 'bg-gray-400' : 'bg-blue-500'}`}></span>

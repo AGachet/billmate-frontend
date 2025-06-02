@@ -111,11 +111,7 @@ export function SignIn() {
 
   // Redirect on successful login
   useEffect(() => {
-    if (signInMutation.isSuccess || isSessionActive) {
-      console.log('signInMutation.isSuccess', signInMutation.isSuccess)
-      console.log('isSessionActive', isSessionActive)
-      navigate('/dashboard')
-    }
+    if (signInMutation.isSuccess || isSessionActive) navigate('/dashboard')
   }, [isSessionActive, signInMutation.isSuccess, navigate])
 
   const onSubmit = (values: SignInPayloadDto) => {

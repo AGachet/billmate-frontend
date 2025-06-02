@@ -32,14 +32,11 @@ export function RecentList({ items, emptyIcon, emptyText, showLink = true, linkT
     )
   }
 
-  const ListContainer = gridLayout ? 'div' : 'ul'
-  const ItemContainer = gridLayout ? 'div' : 'li'
-
   return (
     <>
-      <ListContainer className={`flex flex-1 ${gridLayout ? 'grid grid-cols-1 gap-2 md:grid-cols-3' : 'flex-col gap-2'}`}>
+      <ul className={`flex flex-1 ${gridLayout ? 'grid grid-cols-1 gap-2 md:grid-cols-3' : 'flex-col gap-2'}`}>
         {items.map((item) => (
-          <ItemContainer key={item.id} className="flex items-center justify-between rounded-md border border-muted bg-muted/50 p-4">
+          <li key={item.id} className="flex items-center justify-between rounded-md border border-muted bg-muted/50 p-4">
             <div className="flex items-center gap-4">
               <Avatar initials={item.initials} icon={item.icon} bgColor={item.bgColor} textColor={item.textColor} />
               <div>
@@ -48,9 +45,9 @@ export function RecentList({ items, emptyIcon, emptyText, showLink = true, linkT
               </div>
             </div>
             <div className="text-xs text-muted-foreground">{new Date(item.createdAt).toLocaleDateString()}</div>
-          </ItemContainer>
+          </li>
         ))}
-      </ListContainer>
+      </ul>
       {showLink && linkText && linkTo && (
         <div className="mt-5 flex justify-end px-1">
           <Link to={linkTo} className="text-primary transition hover:opacity-80">
