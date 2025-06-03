@@ -13,6 +13,7 @@ import apiClient from '@/lib/api/client'
 
 // Translation
 const tEntities = (key: string) => i18next.t(key, { ns: 'entities' })
+const tCommon = (key: string) => i18next.t(key, { ns: 'common' })
 
 /**
  * Schemas & DTOs
@@ -21,17 +22,17 @@ export const useEntityCreateSchema = () => {
   const payload = z.object({
     name: z
       .string()
-      .min(1, { message: tEntities('fields.tk_nameRequired_') })
-      .max(100, { message: tEntities('fields.tk_nameMaxLength_') }),
+      .min(2, { message: tCommon('fields.errors.tk_minLength_') })
+      .max(100, { message: tCommon('fields.errors.tk_maxLength_') }),
     description: z.string().max(255).optional(),
-    accountId: z.string().min(1, { message: tEntities('fields.tk_accountIdRequired_') }),
+    accountId: z.string().min(1, { message: tCommon('fields.errors.tk_required_') }),
     organization: z.object({
       name: z
         .string()
-        .min(1, { message: tEntities('fields.tk_organizationNameRequired_') })
-        .max(100, { message: tEntities('fields.tk_organizationNameMaxLength_') }),
+        .min(2, { message: tCommon('fields.errors.tk_minLength_') })
+        .max(100, { message: tCommon('fields.errors.tk_maxLength_') }),
       type: z.enum(['COMPANY', 'ASSOCIATION', 'COMMUNITY'], {
-        message: tEntities('fields.tk_organizationTypeError_')
+        message: tCommon('fields.errors.tk_invalid_')
       }),
       description: z.string().max(255).optional(),
       website: z.string().max(100).optional()
@@ -100,7 +101,8 @@ export const useEntityCreate = () => {
         description: data.organization.description,
         website: data.organization.website
       })
-
+      console.log('organization', organization)
+      console.log('data', data)
       // Then, create the entity with the organization ID
       const response = await apiClient.post<EntityCreateResponseDto>('/entities', {
         name: data.name,
