@@ -43,9 +43,14 @@ actions:
   tk_cancel_: Cancel
   tk_send_: Send
   tk_resend_: Resend
+  tk_loading_: 'In progress...'
 
 fields:
-  tk_localeError_: Invalid locale
+  errors:
+    tk_locale_: Invalid locale
+    tk_required_: This field is required
+    tk_minLength_: This field does not meet the minimum length requirements
+    tk_maxLength_: This field exceeds the maximum length requirements
 
 filters:
   tk_title_: Filters

@@ -49,7 +49,11 @@ actions:
   tk_resend_: Renvoyer
 
 fields:
-  tk_localeError_: Locale invalide
+  errors:
+    tk_locale_: Locale invalide
+    tk_required_: Ce champ est requis
+    tk_minLength_: Ce champ ne respecte pas la longueur minimale
+    tk_maxLength_: Ce champ dépasse la longueur maximale
 
 filters:
   tk_title_: Filtres
