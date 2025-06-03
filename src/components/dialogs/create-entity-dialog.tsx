@@ -11,7 +11,7 @@ import { z } from 'zod'
 /**
  * Dependencies
  */
-import { useEntityCreate } from '@/hooks/api/entities/mutations/useEntityCreate'
+import { useEntityCreate, useEntityCreateSchema } from '@/hooks/api/entities/mutations/useEntityCreate'
 import { useModuleAccess } from '@/hooks/auth/useModuleAccess'
 
 /**
@@ -28,19 +28,6 @@ import { Textarea } from '@/components/ui/shadcn/textarea'
  * Types
  */
 import type { MeResponseDto } from '@/hooks/api/auth'
-
-const formSchema = z.object({
-  name: z.string().min(1, { message: 'Le nom est requis' }).max(100, { message: 'Le nom ne peut pas dépasser 100 caractères' }),
-  description: z.string().max(255).optional(),
-  organization: z.object({
-    name: z.string().min(1, { message: "Le nom de l'organisation est requis" }).max(100, { message: 'Le nom ne peut pas dépasser 100 caractères' }),
-    type: z.enum(['COMPANY', 'ASSOCIATION', 'COMMUNITY'], { message: "Le type d'organisation est invalide" }),
-    description: z.string().max(255).optional(),
-    website: z.string().max(100).optional()
-  })
-})
-
-type FormValues = z.infer<typeof formSchema>
 
 type CreateEntityDialogProps = {
   isOpen: boolean
@@ -61,9 +48,13 @@ export function CreateEntityDialog({ isOpen, onOpenChange }: CreateEntityDialogP
   // Create entity mutation
   const createEntity = useEntityCreate()
 
+  const { payload: formSchema } = useEntityCreateSchema()
+  type FormValues = z.infer<typeof formSchema>
+
   const form = useForm<FormValues>({
     resolver: zodResolver(formSchema),
     defaultValues: {
+      accountId: accountId,
       name: '',
       description: '',
       organization: {
@@ -78,8 +69,7 @@ export function CreateEntityDialog({ isOpen, onOpenChange }: CreateEntityDialogP
   const handleSubmit = async (data: FormValues) => {
     try {
       await createEntity.submitAsync({
-        ...data,
-        accountId: accountId as string
+        ...data
       })
 
       // Invalidate queries to refresh data
@@ -109,7 +99,7 @@ export function CreateEntityDialog({ isOpen, onOpenChange }: CreateEntityDialogP
         <Form {...form}>
           <form onSubmit={form.handleSubmit(handleSubmit)} className="space-y-4">
             {hasPermission('ENTITY_CREATION') && (
-              <div className="space-y-4 rounded-md border p-4">
+              <div data-testid="entity-details" className="space-y-4 rounded-md border p-4">
                 <h3 className="text-sm font-medium">{tAccount('entities.tk_entity-details_')}</h3>
                 <FormField
                   control={form.control}
@@ -141,7 +131,7 @@ export function CreateEntityDialog({ isOpen, onOpenChange }: CreateEntityDialogP
             )}
 
             {hasPermission('ORGANIZATION_CREATION') && (
-              <div className="space-y-4 rounded-md border p-4">
+              <div data-testid="organization-details" className="space-y-4 rounded-md border p-4">
                 <h3 className="text-sm font-medium">{tAccount('organizations.tk_organization-details_')}</h3>
                 <FormField
                   control={form.control}
@@ -169,24 +159,15 @@ export function CreateEntityDialog({ isOpen, onOpenChange }: CreateEntityDialogP
                           </SelectTrigger>
                         </FormControl>
                         <SelectContent>
-                          <SelectItem
-                            value="COMPANY"
-                            className="cursor-pointer transition-colors hover:bg-muted data-[state=checked]:bg-primary/10 data-[state=checked]:font-semibold data-[state=checked]:text-primary"
-                          >
-                            {tAccount('organizations.tk_type-company_')}
-                          </SelectItem>
-                          <SelectItem
-                            value="ASSOCIATION"
-                            className="cursor-pointer transition-colors hover:bg-muted data-[state=checked]:bg-primary/10 data-[state=checked]:font-semibold data-[state=checked]:text-primary"
-                          >
-                            {tAccount('organizations.tk_type-association_')}
-                          </SelectItem>
-                          <SelectItem
-                            value="COMMUNITY"
-                            className="cursor-pointer transition-colors hover:bg-muted data-[state=checked]:bg-primary/10 data-[state=checked]:font-semibold data-[state=checked]:text-primary"
-                          >
-                            {tAccount('organizations.tk_type-community_')}
-                          </SelectItem>
+                          {['COMPANY', 'ASSOCIATION', 'COMMUNITY'].map((type) => (
+                            <SelectItem
+                              key={type}
+                              value={type}
+                              className="cursor-pointer transition-colors hover:bg-muted data-[state=checked]:bg-primary/10 data-[state=checked]:font-semibold data-[state=checked]:text-primary"
+                            >
+                              {tAccount(`organizations.tk_type-${type.toLowerCase()}_`)}
+                            </SelectItem>
+                          ))}
                         </SelectContent>
                       </Select>
                       <FormMessage />
@@ -224,7 +205,7 @@ export function CreateEntityDialog({ isOpen, onOpenChange }: CreateEntityDialogP
 
             <DialogFooter>
               <Button type="submit" disabled={createEntity.isLoading}>
-                <Building2 className="mr-2 h-4 w-4" />
+                <Building2 className="h-4 w-4" />
                 {createEntity.isLoading ? tCommon('actions.tk_loading_') : tCommon('actions.tk_create_')}
               </Button>
             </DialogFooter>
