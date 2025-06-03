@@ -4,13 +4,18 @@
 const testData = {
   accountId: 'acc-123e4567-e89b-12d3-a456-426614174000',
   entityId: 'ent-123e4567-e89b-12d3-a456-426614174000',
+  entityId2: 'ent-123e4567-e89b-12d3-a456-426614174001',
   userId: '123e4567-e89b-12d3-a456-426614174000',
   userEmail: 'john.doe@example.com',
   userFirstName: 'John',
   userLastName: 'Doe',
   entityName: 'Test Entity',
   entityDescription: 'Test entity description',
+  entityName2: 'Test Entity 2',
+  entityDescription2: 'Test entity description 2',
   organizationName: 'Test Organization',
+  organizationName2: 'Test Organization 2',
+  organizationDescription2: 'Test organization description 2',
   organizationType: 'COMPANY',
   roleName: 'Admin',
   roleId: 1
@@ -135,8 +140,41 @@ const testApi = {
       }
     }
   },
+  createOrganization: {
+    URL: `**/api/organizations`,
+    success: {
+      status: 200,
+      body: {
+        id: 'org-456',
+        name: testData.organizationName2,
+        type: testData.organizationType,
+        description: testData.organizationDescription2,
+        website: '',
+        createdAt: new Date().toISOString(),
+        updatedAt: new Date().toISOString()
+      }
+    }
+  },
+  createEntity: {
+    URL: `**/api/entities`,
+    success: {
+      status: 200,
+      body: {
+        id: testData.entityId2,
+        name: testData.entityName2,
+        isActive: true,
+        description: testData.entityDescription2,
+        organization: {
+          id: 'org-456',
+          name: testData.organizationName2
+        },
+        createdAt: new Date().toISOString(),
+        updatedAt: new Date().toISOString()
+      }
+    }
+  },
   entities: {
-    URL: `**/accounts/${testData.accountId}/entities`,
+    URL: `**/api/accounts/${testData.accountId}/entities`,
     success: {
       status: 200,
       body: {
@@ -162,11 +200,47 @@ const testApi = {
           },
           count: 1
         }
+      },
+      body2: {
+        items: [
+          {
+            id: testData.entityId,
+            name: testData.entityName,
+            description: testData.entityDescription,
+            isActive: true,
+            organization: {
+              id: 'org-123',
+              name: testData.organizationName
+            },
+            createdAt: new Date().toISOString(),
+            updatedAt: new Date().toISOString()
+          },
+          {
+            id: testData.entityId2,
+            name: testData.entityName2,
+            description: testData.entityDescription2,
+            isActive: true,
+            organization: {
+              id: 'org-456',
+              name: testData.organizationName2
+            },
+            createdAt: new Date().toISOString(),
+            updatedAt: new Date().toISOString()
+          }
+        ],
+        meta: {
+          pagination: {
+            current: 1,
+            limit: 10,
+            total: 1
+          },
+          count: 1
+        }
       }
     }
   },
   users: {
-    URL: `**/accounts/${testData.accountId}/users`,
+    URL: `**/api/accounts/${testData.accountId}/users`,
     success: {
       status: 200,
       body: {
@@ -233,7 +307,7 @@ const testApi = {
     }
   },
   roles: {
-    URL: `**/accounts/${testData.accountId}/roles`,
+    URL: `**/api/accounts/${testData.accountId}/roles`,
     success: {
       status: 200,
       body: {
@@ -278,7 +352,7 @@ const testApi = {
     }
   },
   invitations: {
-    URL: `**/invitations`,
+    URL: `**/api/invitations`,
     success: {
       status: 200,
       bodyEmpty: {
@@ -313,7 +387,7 @@ const testApi = {
     }
   },
   inviteUser: {
-    URL: `**/accounts/${testData.accountId}/invite-user`,
+    URL: `**/api/accounts/${testData.accountId}/invite-user`,
     success: {
       status: 200,
       body: { message: 'User invitation sent successfully' }
@@ -404,6 +478,25 @@ const selectors = {
         organization: { name: /^Organizations$/i },
         createdAt: { name: /^Created at$/i }
       }
+    },
+    newEntityDialog: {
+      title: { name: /^New entity$/i },
+      subtitle: { name: /^Create a new entity to attach to your account$/i },
+      entity: {
+        blockId: 'entity-details',
+        title: { name: /^Entity details$/i }
+      },
+      organization: {
+        blockId: 'organization-details',
+        title: { name: /^Organization details$/i },
+        types: {
+          cta: { name: /^Type$/i },
+          list: { name: /^CompanyAssociationCommunity$/i }
+        }
+      },
+      cta: {
+        create: { name: /^Create$/i }
+      }
     }
   },
   accountUsers: {
@@ -421,34 +514,6 @@ const selectors = {
         createdAt: { name: /^Created at$/i }
       }
     }
-  },
-
-  fields: {
-    search: /search/i,
-    name: /name/i,
-    description: /description/i,
-    email: /email/i,
-    firstName: /first name/i,
-    lastName: /last name/i,
-    type: /type/i,
-    status: /status/i
-  },
-
-  errors: {
-    requiredName: /name is required/i,
-    requiredEmail: /email is required/i,
-    invalidEmail: /email is invalid/i,
-    requiredFirstName: /first name is required/i,
-    requiredLastName: /last name is required/i,
-    userAlreadyExists: /user already exists/i,
-    entityCreationFailed: /failed to create entity/i,
-    invitationFailed: /failed to send invitation/i
-  },
-
-  success: {
-    userInvited: /user invitation sent successfully/i,
-    entityCreated: /entity created successfully/i,
-    accountUpdated: /account updated successfully/i
   }
 }
 

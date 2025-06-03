@@ -6,7 +6,7 @@ import { expect, Page, Route, test } from '@playwright/test'
 /**
  * Dependencies
  */
-import { selectors, testApi } from '../selectors/account.se'
+import { selectors, testApi, testData } from '../selectors/account.se'
 import { selectors as authSelectors, testApi as authTestApi } from '../selectors/auth.se'
 import { selectors as globaleSelectors } from '../selectors/globale.se'
 import { setupApiInterceptor } from '../utils/api-interceptor'
@@ -83,10 +83,6 @@ test.describe('Account Management Flow', () => {
     await page.getByRole('button', authSelectors.dashboard.cta.userMenu).click()
     await page.getByRole('menuitem', authSelectors.dashboard.cta.account).click()
 
-    // Verify that texts don't contain translation keys
-    const elements = await page.$$('text=/.tk_/')
-    expect(elements.length).toBe(0)
-
     // Check for the success URL
     await expect(page).toHaveURL(selectors.accountOverview.successURL)
 
@@ -101,6 +97,11 @@ test.describe('Account Management Flow', () => {
     await expect(page.getByTestId(selectors.accountOverview.recentUsers.blockId)).toBeVisible()
     await expect(page.getByTestId(selectors.accountOverview.recentEntities.blockId)).toBeVisible()
     await expect(page.getByTestId(selectors.accountOverview.recentRoles.blockId)).toBeVisible()
+  })
+
+  test('should not have translation keys in the page', async ({ page }) => {
+    const elements = await page.$$('text=/.tk_/')
+    expect(elements.length).toBe(0)
   })
 
   test.describe('Account Overview', () => {
@@ -118,6 +119,11 @@ test.describe('Account Management Flow', () => {
       await expect(breadcrumb.locator('li').nth(0)).toHaveText('Account')
       await expect(breadcrumb.locator('li').nth(2)).toHaveText('Overview')
       await expect(pageDescription).toHaveText('View and manage your account details')
+    })
+
+    test('should not have translation keys in the page', async ({ page }) => {
+      const elements = await page.$$('text=/.tk_/')
+      expect(elements.length).toBe(0)
     })
 
     test('should display account information correctly', async ({ page }) => {
@@ -288,6 +294,11 @@ test.describe('Account Management Flow', () => {
       await expect(page).toHaveURL(selectors.accountEntities.successURL)
     })
 
+    test('should not have translation keys in the page', async ({ page }) => {
+      const elements = await page.$$('text=/.tk_/')
+      expect(elements.length).toBe(0)
+    })
+
     test('should display filters and action button', async ({ page }) => {
       // Check search & status filters
       await expect(page.getByTestId(globaleSelectors.filters.search.blockId)).toBeVisible()
@@ -329,6 +340,101 @@ test.describe('Account Management Flow', () => {
       })
       // Check created at format (ex: Jun 2, 2025)
       await expect(firstRow.getByText(new RegExp(createdAt))).toBeVisible()
+    })
+
+    test.describe('Create entity', () => {
+      test('should display create entity modal', async ({ page }) => {
+        const dialog = page.getByRole('dialog')
+        await page.getByRole('button', selectors.accountEntities.cta.createEntity).click()
+        await expect(dialog).toBeVisible()
+
+        // Check dialog header
+        await expect(dialog.getByText(new RegExp(selectors.accountEntities.newEntityDialog.title.name))).toBeVisible()
+        await expect(dialog.getByText(new RegExp(selectors.accountEntities.newEntityDialog.subtitle.name))).toBeVisible()
+        // Check create button
+        await expect(page.getByRole('button', selectors.accountEntities.newEntityDialog.cta.create)).toBeVisible()
+        // Check entity content
+        const entityContent = dialog.getByTestId(selectors.accountEntities.newEntityDialog.entity.blockId)
+        await expect(entityContent.getByText(new RegExp(selectors.accountEntities.newEntityDialog.entity.title.name))).toBeVisible()
+        await expect(entityContent.getByLabel(globaleSelectors.fields.name)).toBeVisible()
+        await expect(entityContent.getByLabel(globaleSelectors.fields.description)).toBeVisible()
+        // Check organization content
+        const organizationContent = dialog.getByTestId(selectors.accountEntities.newEntityDialog.organization.blockId)
+        await expect(organizationContent.getByText(new RegExp(selectors.accountEntities.newEntityDialog.organization.title.name))).toBeVisible()
+        await expect(organizationContent.getByLabel(globaleSelectors.fields.name)).toBeVisible()
+        await expect(organizationContent.getByLabel(globaleSelectors.fields.description)).toBeVisible()
+        await expect(organizationContent.getByLabel(globaleSelectors.fields.type)).toBeVisible()
+        await expect(organizationContent.getByLabel(globaleSelectors.fields.website)).toBeVisible()
+
+        // Check organization type
+        await organizationContent.getByRole('combobox', selectors.accountEntities.newEntityDialog.organization.types.cta).click()
+        await expect(page.getByRole('listbox').getByText(selectors.accountEntities.newEntityDialog.organization.types.list.name)).toBeVisible()
+      })
+
+      test('should not create entity if form is invalid & rise error messages', async ({ page }) => {
+        const dialog = page.getByRole('dialog')
+        await page.getByRole('button', selectors.accountEntities.cta.createEntity).click()
+        await expect(dialog).toBeVisible()
+
+        // Check error message
+        dialog.getByRole('button', selectors.accountEntities.newEntityDialog.cta.create).click()
+        const entityContent = dialog.getByTestId(selectors.accountEntities.newEntityDialog.entity.blockId)
+        await expect(entityContent.getByText(globaleSelectors.fields.errors.minLength)).toBeVisible()
+
+        const organizationContent = dialog.getByTestId(selectors.accountEntities.newEntityDialog.organization.blockId)
+        await expect(organizationContent.getByText(globaleSelectors.fields.errors.minLength)).toBeVisible()
+      })
+
+      test('should create entity with organization', async ({ page }) => {
+        // Mock create organization
+        await (page as CustomPage).mockRoute(testApi.createOrganization.URL, async (route) => {
+          await route.fulfill({
+            status: testApi.createOrganization.success.status,
+            contentType: 'application/json',
+            body: JSON.stringify(testApi.createOrganization.success.body)
+          })
+        })
+
+        // Mock create entity
+        await (page as CustomPage).mockRoute(testApi.createEntity.URL, async (route) => {
+          await route.fulfill({
+            status: testApi.createEntity.success.status,
+            contentType: 'application/json',
+            body: JSON.stringify(testApi.createEntity.success.body)
+          })
+        })
+
+        // Mock entities data by default
+        await (page as CustomPage).mockRoute(testApi.entities.URL, async (route) => {
+          await route.fulfill({
+            status: testApi.entities.success.status,
+            contentType: 'application/json',
+            body: JSON.stringify(testApi.entities.success.body2)
+          })
+        })
+
+        const dialog = page.getByRole('dialog')
+        await page.getByRole('button', selectors.accountEntities.cta.createEntity).click()
+        await expect(dialog).toBeVisible()
+
+        // Fill Entity form with valid data
+        const entityContent = dialog.getByTestId(selectors.accountEntities.newEntityDialog.entity.blockId)
+        await entityContent.getByLabel(globaleSelectors.fields.name).fill(testData.entityName2)
+        await entityContent.getByLabel(globaleSelectors.fields.description).fill(testData.entityDescription2)
+
+        // Fill Organization form with valid data
+        const organizationContent = dialog.getByTestId(selectors.accountEntities.newEntityDialog.organization.blockId)
+        await organizationContent.getByLabel(globaleSelectors.fields.name).fill(testData.organizationName2)
+        await organizationContent.getByLabel(globaleSelectors.fields.description).fill(testData.organizationDescription2)
+
+        // Click on create button
+        await page.getByRole('button', selectors.accountEntities.newEntityDialog.cta.create).click()
+        await expect(dialog).not.toBeVisible({ timeout: 5000 })
+
+        // Check that the entity is created
+        const rows = page.locator('tbody tr')
+        await expect(rows).toHaveCount(testApi.entities.success.body2.items.length)
+      })
     })
   })
 
@@ -387,6 +493,11 @@ test.describe('Account Management Flow', () => {
       await expect(breadcrumb.locator('li').nth(2)).toHaveText('Users')
       await expect(pageDescription).toHaveText('Manage your team members and their permissions')
       await expect(page).toHaveURL(selectors.accountUsers.successURL)
+    })
+
+    test('should not have translation keys in the page', async ({ page }) => {
+      const elements = await page.$$('text=/.tk_/')
+      expect(elements.length).toBe(0)
     })
 
     test('should display filters and action button', async ({ page }) => {
