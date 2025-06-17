@@ -269,6 +269,9 @@ test.describe('Account Management Flow', () => {
       // Setup authenticated user
       await setupAuthenticatedUser(page as CustomPage, 'admin')
 
+      // First navigate to the account page
+      await page.goto(selectors.URL)
+
       // Mock entities data by default
       await (page as CustomPage).mockRoute(testApi.entities.URL, async (route) => {
         await route.fulfill({
@@ -278,8 +281,7 @@ test.describe('Account Management Flow', () => {
         })
       })
 
-      // First navigate to the account page then click on the entities tab
-      await page.goto(selectors.URL)
+      // Then click on the entities tab
       await page.getByRole('tab', selectors.sectionTabs.entities).click()
     })
 
@@ -443,7 +445,10 @@ test.describe('Account Management Flow', () => {
       // Setup authenticated user
       await setupAuthenticatedUser(page as CustomPage, 'admin')
 
-      // Mock entities data for entities filter
+      // First navigate to the account page
+      await page.goto(selectors.URL)
+
+      // Mock entities data by default
       await (page as CustomPage).mockRoute(testApi.entities.URL, async (route) => {
         await route.fulfill({
           status: testApi.entities.success.status,
@@ -463,11 +468,13 @@ test.describe('Account Management Flow', () => {
 
       // Mock invitations data
       await (page as CustomPage).mockRoute(testApi.invitations.URL, async (route) => {
-        await route.fulfill({
-          status: testApi.invitations.success.status,
-          contentType: 'application/json',
-          body: JSON.stringify(testApi.invitations.success.bodyEmpty)
-        })
+        if (route.request().method() === 'GET') {
+          await route.fulfill({
+            status: testApi.invitations.success.status,
+            contentType: 'application/json',
+            body: JSON.stringify(testApi.invitations.success.body)
+          })
+        }
       })
 
       // Mock users data by default
@@ -479,8 +486,7 @@ test.describe('Account Management Flow', () => {
         })
       })
 
-      // First navigate to the account page then click on the entities tab
-      await page.goto(selectors.URL)
+      // Then click on the users tab
       await page.getByRole('tab', selectors.sectionTabs.users).click()
     })
 
@@ -549,6 +555,98 @@ test.describe('Account Management Flow', () => {
       })
       // Check created at format (ex: Jun 2, 2025)
       await expect(firstRow.getByText(new RegExp(createdAt))).toBeVisible()
+    })
+
+    test.describe('Invite user', () => {
+      test('should display invite user modal', async ({ page }) => {
+        const dialog = page.getByRole('dialog')
+        await page.getByRole('button', selectors.accountUsers.cta.inviteUser).click()
+        await expect(dialog).toBeVisible()
+
+        // Check dialog header
+        await expect(dialog.getByRole('heading', selectors.accountUsers.inviteUserDialog.title)).toBeVisible()
+        await expect(dialog.getByText(new RegExp(selectors.accountUsers.inviteUserDialog.subtitle.name))).toBeVisible()
+        // Check create button
+        await expect(page.getByRole('button', selectors.accountUsers.inviteUserDialog.cta.invite)).toBeVisible()
+        // Checkform
+        await expect(dialog.getByLabel(globaleSelectors.fields.email)).toBeVisible()
+        await expect(dialog.getByLabel(globaleSelectors.fields.firstname)).toBeVisible()
+        await expect(dialog.getByLabel(globaleSelectors.fields.lastname)).toBeVisible()
+
+        // Check roles and entities filters
+        const rolesFilter = dialog.getByTestId(selectors.accountUsers.inviteUserDialog.roles.blockId)
+        const rolesData = testApi.roles.success.body.items
+        await expect(rolesFilter).toBeVisible()
+        await expect(rolesFilter.locator('li').nth(0)).toHaveText(new RegExp(rolesData[1].name))
+        await expect(rolesFilter.locator('li').nth(1)).toHaveText(new RegExp(rolesData[2].name))
+
+        const entitiesFilter = dialog.getByTestId(selectors.accountUsers.inviteUserDialog.entities.blockId)
+        const entitiesData = testApi.entities.success.body.items
+        await expect(entitiesFilter).toBeVisible()
+        await expect(entitiesFilter.locator('li').nth(0)).toHaveText(new RegExp(entitiesData[0].organization.name))
+      })
+
+      test('should not invite user if form is invalid & rise error messages', async ({ page }) => {
+        const dialog = page.getByRole('dialog')
+        await page.getByRole('button', selectors.accountUsers.inviteUserDialog.cta.invite).click()
+        await expect(dialog).toBeVisible()
+
+        // Check error message
+        dialog.getByRole('button', selectors.accountUsers.inviteUserDialog.cta.invite).click()
+        const emailContent = dialog.getByLabel(globaleSelectors.fields.email)
+        await expect(emailContent.locator('..').getByText(globaleSelectors.fields.errors.minLength)).toBeVisible()
+
+        const entitiesFilter = dialog.getByTestId(selectors.accountUsers.inviteUserDialog.entities.blockId)
+        await expect(entitiesFilter.locator('..').getByText(globaleSelectors.fields.errors.minOneEntityOrDirectLink)).toBeVisible()
+      })
+
+      test('should invite user in entity', async ({ page }) => {
+        // Mock create organization
+        await (page as CustomPage).mockRoute(testApi.inviteUser.URL, async (route) => {
+          if (route.request().method() === 'POST') {
+            await route.fulfill({
+              status: testApi.inviteUser.success.status,
+              contentType: 'application/json',
+              body: JSON.stringify(testApi.inviteUser.success.body)
+            })
+            if (route.request().method() === 'GET') {
+              await route.fulfill({
+                status: testApi.invitations.success.status,
+                contentType: 'application/json',
+                body: JSON.stringify(testApi.invitations.success.body)
+              })
+            }
+          }
+        })
+
+        const dialog = page.getByRole('dialog')
+        await page.getByRole('button', selectors.accountUsers.cta.inviteUser).click()
+        await expect(dialog).toBeVisible()
+
+        // Fill email field
+        const emailContent = dialog.getByLabel(globaleSelectors.fields.email)
+        await emailContent.fill(testData.userEmail)
+
+        // Fill firstname field
+        const firstnameContent = dialog.getByLabel(globaleSelectors.fields.firstname)
+        await firstnameContent.fill(testData.userFirstName)
+
+        // Fill lastname field
+        const lastnameContent = dialog.getByLabel(globaleSelectors.fields.lastname)
+        await lastnameContent.fill(testData.userLastName)
+
+        // Select first role
+        const rolesFilter = dialog.getByTestId(selectors.accountUsers.inviteUserDialog.roles.blockId)
+        await rolesFilter.locator('li').nth(0).click()
+
+        // Select first entity
+        const entitiesFilter = dialog.getByTestId(selectors.accountUsers.inviteUserDialog.entities.blockId)
+        await entitiesFilter.locator('li').nth(0).click()
+
+        // Click on create button
+        await page.getByRole('button', selectors.accountUsers.inviteUserDialog.cta.invite).click()
+        await expect(dialog).not.toBeVisible({ timeout: 5000 })
+      })
     })
   })
 })

@@ -338,7 +338,7 @@ export function AccountEntities() {
         )}
       </Card>
 
-      {hasPermission('ENTITY_CREATION') && <CreateEntityDialog isOpen={isCreateDialogOpen} onOpenChange={setIsCreateDialogOpen} />}
+      {hasPermission('ENTITY_CREATION') && isCreateDialogOpen && <CreateEntityDialog isOpen={isCreateDialogOpen} onOpenChange={setIsCreateDialogOpen} />}
     </div>
   )
 }
