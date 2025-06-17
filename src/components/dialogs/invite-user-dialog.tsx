@@ -12,7 +12,7 @@ import { z } from 'zod'
 /**
  * Dependencies
  */
-import { useInviteUser } from '@/hooks/api/accounts/mutations/useInviteUserCreate'
+import { useInviteUser, useInviteUserSchema } from '@/hooks/api/accounts/mutations/useInviteUserCreate'
 import { useAccountEntities } from '@/hooks/api/accounts/queries/useAccountEntities'
 import { useAccountRoles } from '@/hooks/api/accounts/queries/useAccountRoles'
 import { useInvitedUsers } from '@/hooks/api/invitations/queries/useInvitedUsers'
@@ -21,6 +21,7 @@ import { useModuleAccess } from '@/hooks/auth/useModuleAccess'
 /**
  * Components
  */
+import { SelectableList, type SelectableListItem } from '@/components/ui/custom/selectable-list'
 import { Button } from '@/components/ui/shadcn/button'
 import { Checkbox } from '@/components/ui/shadcn/checkbox'
 import { Dialog, DialogContent, DialogDescription, DialogFooter, DialogHeader, DialogTitle } from '@/components/ui/shadcn/dialog'
@@ -35,40 +36,36 @@ import { Skeleton } from '@/components/ui/shadcn/skeleton'
 import type { InviteUserPayloadDto } from '@/hooks/api/accounts/mutations/useInviteUserCreate'
 import type { MeResponseDto } from '@/hooks/api/auth'
 
-const formSchema = z
-  .object({
-    email: z.string().email(),
-    firstname: z.string().min(1),
-    lastname: z.string().min(1),
-    roleIds: z.array(z.number()).min(1),
-    entityIds: z.array(z.string()),
-    isDirectlyLinked: z.boolean().default(false),
-    accountIds: z.array(z.string()).default([])
-  })
-  .refine(
-    (data) => {
-      // At least one of the two fields must be filled
-      return data.isDirectlyLinked || data.entityIds.length > 0
-    },
-    {
-      message: 'Vous devez sélectionner au moins une entité ou rattacher directement au compte',
-      path: ['entityIds']
-    }
-  )
-
-type FormValues = z.infer<typeof formSchema>
-
 type InviteUserDialogProps = {
   isOpen: boolean
   onOpenChange: (open: boolean) => void
 }
 
 export function InviteUserDialog({ isOpen, onOpenChange }: InviteUserDialogProps) {
+  const { t: tCommon } = useTranslation('common')
+  // Create extended schema based on existing API schema
+  const baseInviteSchema = useInviteUserSchema()
+  const formSchema = baseInviteSchema.payload
+    .extend({
+      isDirectlyLinked: z.boolean().default(false)
+    })
+    .refine(
+      (data) => {
+        // At least one entity or direct link must be selected
+        return data.isDirectlyLinked || (data.entityIds && data.entityIds.length > 0)
+      },
+      {
+        message: tCommon('fields.errors.tk_minOneEntityOrDirectLink_'),
+        path: ['entityIds']
+      }
+    )
+
+  type FormValues = z.infer<typeof formSchema>
+
   const queryClient = useQueryClient()
   const [searchRoles, setSearchRoles] = useState('')
   const [searchEntities, setSearchEntities] = useState('')
   const { t: tAccount } = useTranslation('account')
-  const { t: tCommon } = useTranslation('common')
   const { hasPermission } = useModuleAccess()
 
   // Get accountId from authMe
@@ -210,7 +207,7 @@ export function InviteUserDialog({ isOpen, onOpenChange }: InviteUserDialogProps
                   <FormItem>
                     <FormLabel>{tCommon('items.tk_roles_')}</FormLabel>
                     <FormControl>
-                      <div className="space-y-2">
+                      <div className="space-y-2" data-testid="roles-filter">
                         <div className="relative">
                           <Search className="absolute left-3 top-1/2 h-4 w-4 -translate-y-1/2 text-muted-foreground" />
                           <Input placeholder={tCommon('filters.tk_search-placeholder_')} value={searchRoles} onChange={(e) => setSearchRoles(e.target.value)} className="pl-9" />
@@ -231,28 +228,22 @@ export function InviteUserDialog({ isOpen, onOpenChange }: InviteUserDialogProps
                             ) : rolesData?.items.length === 0 ? (
                               <div className="flex h-[200px] items-center justify-center text-muted-foreground">{tAccount('roles.tk_table-no-roles_')}</div>
                             ) : (
-                              <div className="p-2">
-                                {rolesData?.items
-                                  .filter((role) => role.name.toLowerCase() !== 'guest')
-                                  .map((role) => (
-                                    <div
-                                      key={role.id}
-                                      className={`flex cursor-pointer items-center justify-between px-4 py-2 text-sm capitalize transition-colors ${
-                                        field.value.includes(role.id) ? 'bg-primary/10 font-semibold text-primary' : 'hover:bg-muted'
-                                      } last:mb-0`}
-                                      onClick={() => {
-                                        const newRoleIds = field.value.includes(role.id) ? field.value.filter((id) => id !== role.id) : [...field.value, role.id]
-                                        field.onChange(newRoleIds)
-                                      }}
-                                    >
-                                      <div className="flex flex-1 flex-col">
-                                        <span className="font-medium capitalize">{role.name}</span>
-                                        {role.description && <span className="text-xs text-muted-foreground">{role.description}</span>}
-                                      </div>
-                                      {field.value.includes(role.id) && <span className="ml-2 text-primary">✓</span>}
-                                    </div>
-                                  ))}
-                              </div>
+                              <SelectableList
+                                items={
+                                  rolesData?.items
+                                    .filter((role) => role.name.toLowerCase() !== 'guest')
+                                    .map(
+                                      (role): SelectableListItem => ({
+                                        id: role.id,
+                                        title: role.name,
+                                        description: role.description || undefined
+                                      })
+                                    ) || []
+                                }
+                                selectedIds={field.value || []}
+                                onSelectionChange={(newRoleIds) => field.onChange(newRoleIds)}
+                                ariaLabel="Select roles"
+                              />
                             )}
                           </ScrollArea>
                         </div>
@@ -271,7 +262,7 @@ export function InviteUserDialog({ isOpen, onOpenChange }: InviteUserDialogProps
                   <FormItem>
                     <FormLabel>{tCommon('items.tk_entities_')}</FormLabel>
                     <FormControl>
-                      <div className="space-y-2">
+                      <div className="space-y-2" data-testid="entities-filter">
                         <div className="relative">
                           <Search className="absolute left-3 top-1/2 h-4 w-4 -translate-y-1/2 text-muted-foreground" />
                           <Input placeholder={tCommon('filters.tk_search-placeholder_')} value={searchEntities} onChange={(e) => setSearchEntities(e.target.value)} className="pl-9" />
@@ -292,29 +283,21 @@ export function InviteUserDialog({ isOpen, onOpenChange }: InviteUserDialogProps
                             ) : entitiesData?.items.length === 0 ? (
                               <div className="flex h-[200px] items-center justify-center text-muted-foreground">{tAccount('entities.tk_table-no-entities_')}</div>
                             ) : (
-                              <div className="p-2">
-                                {entitiesData?.items.map((entity) => (
-                                  <div
-                                    key={entity.id}
-                                    className={`flex cursor-pointer items-center justify-between px-4 py-2 text-sm capitalize transition-colors ${
-                                      field.value.includes(entity.id) ? 'bg-primary/10 font-semibold text-primary' : 'hover:bg-muted'
-                                    } last:mb-0`}
-                                    onClick={() => {
-                                      const newEntityIds = field.value.includes(entity.id) ? field.value.filter((id) => id !== entity.id) : [...field.value, entity.id]
-                                      field.onChange(newEntityIds)
-                                    }}
-                                  >
-                                    <div className="flex flex-1 flex-col">
-                                      <div className="flex items-center gap-2">
-                                        <span className="font-medium capitalize">{entity.organization?.name}</span>
-                                        <span className="text-xs text-muted-foreground">{entity.name}</span>
-                                      </div>
-                                      {entity.description && <span className="text-xs text-muted-foreground">{entity.description}</span>}
-                                    </div>
-                                    {field.value.includes(entity.id) && <span className="ml-2 text-primary">✓</span>}
-                                  </div>
-                                ))}
-                              </div>
+                              <SelectableList
+                                items={
+                                  entitiesData?.items.map(
+                                    (entity): SelectableListItem => ({
+                                      id: entity.id,
+                                      title: entity.organization?.name || '',
+                                      subtitle: entity.name,
+                                      description: entity.description || undefined
+                                    })
+                                  ) || []
+                                }
+                                selectedIds={field.value || []}
+                                onSelectionChange={(newEntityIds) => field.onChange(newEntityIds)}
+                                ariaLabel="Select entities"
+                              />
                             )}
                           </ScrollArea>
                         </div>

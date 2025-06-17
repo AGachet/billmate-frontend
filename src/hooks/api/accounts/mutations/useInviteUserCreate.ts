@@ -21,8 +21,8 @@ export const useInviteUserSchema = () => {
   const payload = z.object({
     email: z
       .string()
-      .min(1, { message: tAccounts('fields.tk_emailRequired_') })
-      .email({ message: tAccounts('fields.tk_emailError_') })
+      .min(2, { message: tCommon('fields.errors.tk_minLength_') })
+      .email({ message: tCommon('fields.errors.tk_emailError_') })
       .max(100),
     firstname: z.string().max(30).optional(),
     lastname: z.string().max(30).optional(),

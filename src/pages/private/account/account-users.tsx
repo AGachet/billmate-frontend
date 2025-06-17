@@ -638,7 +638,9 @@ export function AccountUsers() {
         </CardFooter>
       </Card>
 
-      {(hasPermission('USER_ACCOUNTS_INVITATION') || hasPermission('USER_ENTITIES_INVITATION')) && <InviteUserDialog isOpen={isInviteDialogOpen} onOpenChange={setIsInviteDialogOpen} />}
+      {(hasPermission('USER_ACCOUNTS_INVITATION') || hasPermission('USER_ENTITIES_INVITATION')) && isInviteDialogOpen && (
+        <InviteUserDialog isOpen={isInviteDialogOpen} onOpenChange={setIsInviteDialogOpen} />
+      )}
     </div>
   )
 }

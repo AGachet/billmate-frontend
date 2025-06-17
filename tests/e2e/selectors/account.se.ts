@@ -22,9 +22,9 @@ const testData = {
 }
 
 const testApi = {
-  interceptorURL: `**/accounts/${testData.accountId}`,
+  interceptorURL: `**/api/accounts/${testData.accountId}`,
   account: {
-    URL: `**/accounts/${testData.accountId}`,
+    URL: `**/api/accounts/${testData.accountId}`,
     success: {
       status: 200,
       body: {
@@ -352,7 +352,8 @@ const testApi = {
     }
   },
   invitations: {
-    URL: `**/api/invitations`,
+    URL: '**/api/invitations',
+    method: 'GET',
     success: {
       status: 200,
       bodyEmpty: {
@@ -364,8 +365,8 @@ const testApi = {
             id: 'cmb7taak1000et8d3ymbkop9v',
             inviterUserId: 'cmb7t0stt0000t8d38o1h89l4',
             inviteeUserId: 'cmb7taa5t000at8d3i0qb02yk',
-            inviteeUserEmail: 'bruce.wayne@.com',
-            status: 'PENDING',
+            inviteeUserEmail: 'bruce.wayne@example.com',
+            status: 'SENT',
             invitedAt: '2025-05-28T10:37:48.146Z',
             acceptedAt: null,
             accounts: [],
@@ -387,7 +388,8 @@ const testApi = {
     }
   },
   inviteUser: {
-    URL: `**/api/accounts/${testData.accountId}/invite-user`,
+    URL: `**/api/invitations`,
+    method: 'POST',
     success: {
       status: 200,
       body: { message: 'User invitation sent successfully' }
@@ -512,6 +514,23 @@ const selectors = {
         entities: { name: /^Entities$/i },
         roles: { name: /^Roles$/i },
         createdAt: { name: /^Created at$/i }
+      }
+    },
+    inviteUserDialog: {
+      title: { name: /^Invite user$/i },
+      subtitle: { name: /^Invite a new user to join your account or entities$/i },
+      user: {
+        blockId: 'user-details',
+        title: { name: /^User details$/i }
+      },
+      roles: {
+        blockId: 'roles-filter'
+      },
+      entities: {
+        blockId: 'entities-filter'
+      },
+      cta: {
+        invite: { name: /^Invite user$/i }
       }
     }
   }

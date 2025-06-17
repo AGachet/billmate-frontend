@@ -5,6 +5,8 @@ const selectors = {
   },
   fields: {
     name: /^Name$/i,
+    firstname: /^First name$/i,
+    lastname: /^Last name$/i,
     description: /^Description$/i,
     type: /^Type$/i,
     website: /^Website$/i,
@@ -12,10 +14,12 @@ const selectors = {
     email: /^Email$/i,
     firstName: /^First name$/i,
     lastName: /^Last name$/i,
+    roles: /^Roles$/i,
     errors: {
       required: /^This field is required$/i,
       minLength: /^This field does not meet the minimum length requirements$/i,
-      maxLength: /^This field exceeds the maximum length requirements$/i
+      maxLength: /^This field exceeds the maximum length requirements$/i,
+      minOneEntityOrDirectLink: /^You must select at least one entity or directly link the user to the current account$/i
     }
   },
   filters: {
